@@ -1,11 +1,11 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import { Root } from './routes/root';
+import Dashboard from './pages/Dashboard';
 import { ThemeProvider } from './ThemeProvider';
 
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <Root />,
+    element: <Dashboard />,
   },
 ]);
 
