@@ -1,10 +1,18 @@
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { Root } from './routes/root';
 import { ThemeProvider } from './ThemeProvider';
-import { Welcome } from './Welcome/Welcome';
+
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <Root />,
+  },
+]);
 
 export default function App() {
   return (
     <ThemeProvider>
-      <Welcome />
+      <RouterProvider router={router} />
     </ThemeProvider>
   );
 }

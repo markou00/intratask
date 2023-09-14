@@ -1,6 +1,6 @@
 import { Button, Stack, Text } from '@mantine/core';
 
-export function Welcome() {
+export function Root() {
   return (
     <Stack align="center" mt={50}>
       <Text size="xl" weight={500}>
