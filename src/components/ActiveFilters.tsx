@@ -3,7 +3,7 @@ import { useDisclosure } from '@mantine/hooks';
 import { IconAdjustmentsHorizontal, IconX } from '@tabler/icons-react';
 import FilterDrawer from './FilterDrawer';
 
-const filterData = ['Kvalitet', 'HMS', 'BIR AS'];
+const filterData = ['2022', 'Kvalitet', 'HMS', 'BIR AS'];
 
 const removeButton = (
   <ActionIcon size="xs" color="reknes" radius="xl" variant="transparent">

@@ -1,4 +1,4 @@
-import { Box, Button, Drawer, Flex, ScrollArea, Text } from '@mantine/core';
+import { Box, Button, Drawer, Flex, NativeSelect, ScrollArea } from '@mantine/core';
 
 interface IFilterDrawer {
   opened: boolean;
@@ -23,16 +23,13 @@ const FilterDrawer = ({ opened, close }: IFilterDrawer) => (
         sx={(theme) => ({
           borderBottom: theme.colorScheme === 'dark' ? '1px solid #2a2a2a' : '1px solid #e6e6e6',
         })}
+        mb={15}
       >
         <Drawer.Title>Filters</Drawer.Title>
         <Drawer.CloseButton />
       </Drawer.Header>
       <Drawer.Body mb={50}>
-        {Array(50)
-          .fill(0)
-          .map((_, index) => (
-            <Text key={index}>asdadada</Text>
-          ))}
+        <NativeSelect data={['2020', '2021', '2022', '2023']} label="Dato" />
       </Drawer.Body>
       <Box
         sx={(theme) => ({
