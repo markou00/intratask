@@ -1,4 +1,6 @@
-import { Container, SimpleGrid } from '@mantine/core';
+import { Box, Container, Paper, SimpleGrid, Title } from '@mantine/core';
+import SimpleAreaChart from '../components/SimpleAreaChart';
+import StackedBarChart from '../components/StackedBarChart';
 import StatsCard from '../components/StatsCard/StatsCard';
 import Layout from '../components/layout/Layout';
 
@@ -8,6 +10,7 @@ const Dashboard = () => (
       <SimpleGrid
         cols={4}
         spacing="xl"
+        mb="lg"
         breakpoints={[
           { maxWidth: '62rem', cols: 3, spacing: 'md' },
           { maxWidth: '48rem', cols: 2, spacing: 'sm' },
@@ -18,6 +21,31 @@ const Dashboard = () => (
         <StatsCard title="Løste avvik" variant="solved" value={6} />
         <StatsCard title="Uløste avvik" variant="unsolved" value={6} />
         <StatsCard title="Avvik fra Zendesk" variant="zendesk" value={10} />
+      </SimpleGrid>
+      <SimpleGrid
+        cols={2}
+        bg="white"
+        breakpoints={[
+          { maxWidth: '62rem', cols: 2, spacing: 'md' },
+          { maxWidth: '48rem', cols: 1, spacing: 'sm' },
+        ]}
+      >
+        <Paper radius="md" shadow="sm" withBorder>
+          <Title order={3} mt="sm" ta="center">
+            Monthly Deviation Chart
+          </Title>
+          <Box h={400}>
+            <StackedBarChart />
+          </Box>
+        </Paper>
+        <Paper radius="md" shadow="sm" withBorder>
+          <Title order={3} mt="sm" ta="center">
+            Monthly Deviation Chart
+          </Title>
+          <Box h={400}>
+            <SimpleAreaChart />
+          </Box>
+        </Paper>
       </SimpleGrid>
     </Container>
   </Layout>
