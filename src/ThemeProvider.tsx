@@ -2,20 +2,20 @@ import { MantineProvider, MantineThemeOverride } from '@mantine/core';
 
 export const theme: MantineThemeOverride = {
   colors: {
-    reknes: [
-      '#f5fde7',
-      '#ebf7d5',
-      '#d7efac',
-      '#c1e67f',
-      '#afde5a',
-      '#a3d942',
-      '#9dd733',
-      '#88be25',
-      '#77a81c',
-      '#65920d',
+    teams: [
+      '#eef1ff',
+      '#dcdef6',
+      '#b7bae5',
+      '#8f94d4',
+      '#6d73c6',
+      '#595fbe',
+      '#4d55bb',
+      '#3e46a5',
+      '#363e95',
+      '#2b3485',
     ],
   },
-  primaryColor: 'reknes',
+  primaryColor: 'teams',
 };
 
 interface ThemeProviderProps {
