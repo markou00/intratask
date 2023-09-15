@@ -1,11 +1,14 @@
 import { Box, Container, Paper, SimpleGrid, Title } from '@mantine/core';
-import SimpleAreaChart from '../components/SimpleAreaChart';
-import StackedBarChart from '../components/StackedBarChart';
 import StatsCard from '../components/StatsCard/StatsCard';
+
+import ActiveFilters from '../components/ActiveFilters';
+import SimpleAreaChart from '../components/charts/SimpleAreaChart';
+import StackedBarChart from '../components/charts/StackedBarChart';
 import Layout from '../components/layout/Layout';
 
 const Dashboard = () => (
   <Layout>
+    <ActiveFilters />
     <Container fluid p="md">
       <SimpleGrid
         cols={4}
