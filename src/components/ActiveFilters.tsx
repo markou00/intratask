@@ -1,18 +1,18 @@
 import { ActionIcon, Badge, Box, Button, ScrollArea, rem } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { IconAdjustmentsHorizontal, IconX } from '@tabler/icons-react';
+import { useFilters } from '../context/FilterContext';
 import FilterDrawer from './FilterDrawer';
-
-const filterData = ['2022', 'Kvalitet', 'HMS', 'BIR AS'];
-
-const removeButton = (
-  <ActionIcon size="xs" color="reknes" radius="xl" variant="transparent">
-    <IconX size={rem(20)} />
-  </ActionIcon>
-);
 
 const ActiveFilters = () => {
   const [opened, { open, close }] = useDisclosure(false);
+  const { filters, clearFilters } = useFilters();
+
+  const removeButton = (
+    <ActionIcon size="xs" color="reknes" radius="xl" variant="transparent" onClick={clearFilters}>
+      <IconX size={rem(20)} />
+    </ActionIcon>
+  );
 
   return (
     <Box
@@ -47,7 +47,7 @@ const ActiveFilters = () => {
 
           <FilterDrawer opened={opened} close={close} />
 
-          {filterData.map((filter, index) => (
+          {filters.map((filter, index) => (
             <Badge
               key={index}
               radius="md"
