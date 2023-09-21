@@ -4,6 +4,7 @@ import { Button } from '@mantine/core';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { ThemeProvider } from './ThemeProvider';
 import { loginRequest } from './authConfig';
+import { FilterProvider } from './context/FilterContext';
 import Dashboard from './pages/Dashboard';
 
 interface IApp {
@@ -25,7 +26,9 @@ export default function App({ msalInstance }: IApp) {
               element={
                 <>
                   <AuthenticatedTemplate>
-                    <Dashboard />
+                    <FilterProvider>
+                      <Dashboard />
+                    </FilterProvider>
                   </AuthenticatedTemplate>
                   <UnauthenticatedTemplate>
                     <Button onClick={handleLoginRedirect}>Login</Button>
