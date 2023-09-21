@@ -1,13 +1,13 @@
 /* eslint-disable no-useless-return */
 /* eslint-disable no-console */
-import { LogLevel } from '@azure/msal-browser';
+import { Configuration, LogLevel } from '@azure/msal-browser';
 
 /**
  * Configuration object to be passed to MSAL instance on creation.
  * For a full list of MSAL.js configuration parameters, visit:
  * https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-browser/docs/configuration.md
  */
-export const msalConfig = {
+export const msalConfig: Configuration = {
   auth: {
     clientId: import.meta.env.VITE_AZURE_AD_APPLICATION_ID, // This is the ONLY mandatory field that you need to supply.
     authority: `https://login.microsoftonline.com/${import.meta.env.VITE_AZURE_AD_DIRECTORY_ID}`, // Defaults to "https://login.microsoftonline.com/common"
@@ -21,7 +21,7 @@ export const msalConfig = {
   },
   system: {
     loggerOptions: {
-      loggerCallback: (level: any, message: any, containsPii: any) => {
+      loggerCallback: (level, message, containsPii) => {
         if (containsPii) {
           return;
         }

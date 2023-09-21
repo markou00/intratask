@@ -1,3 +1,4 @@
+import { IPublicClientApplication } from '@azure/msal-browser';
 import { AuthenticatedTemplate, MsalProvider, UnauthenticatedTemplate } from '@azure/msal-react';
 import { Button } from '@mantine/core';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
@@ -6,7 +7,7 @@ import { loginRequest } from './authConfig';
 import Dashboard from './pages/Dashboard';
 
 interface IApp {
-  msalInstance: any;
+  msalInstance: IPublicClientApplication;
 }
 
 export default function App({ msalInstance }: IApp) {
