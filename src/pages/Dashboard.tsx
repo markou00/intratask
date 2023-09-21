@@ -40,7 +40,7 @@ const Dashboard = () => (
             Monthly Deviation Chart
           </Title>
           <Box h={400}>
-            <StackedBarChart />
+            <SimplePieChart />
           </Box>
         </Paper>
         <Paper radius="md" shadow="sm" withBorder>
@@ -52,21 +52,13 @@ const Dashboard = () => (
           </Box>
         </Paper>
       </SimpleGrid>
-      <SimpleGrid
-        cols={3}
-        bg="white"
-        breakpoints={[
-          { maxWidth: '62rem', cols: 2, spacing: 'md' },
-          { maxWidth: '48rem', cols: 1, spacing: 'sm' },
-          { maxWidth: '36rem', cols: 1, spacing: 'sm' },
-        ]}
-      >
+      <SimpleGrid cols={1} bg="white">
         <Paper radius="md" shadow="sm" withBorder>
           <Title order={3} mt="sm" ta="center">
             Monthly Deviation Chart
           </Title>
-          <Box h={400}>
-            <SimplePieChart />
+          <Box h={500}>
+            <StackedBarChart />
           </Box>
         </Paper>
       </SimpleGrid>
