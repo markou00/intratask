@@ -1,3 +1,4 @@
+import { useMsal } from '@azure/msal-react';
 import {
   ActionIcon,
   Button,
@@ -16,8 +17,14 @@ interface ILayout {
 
 const Layout = ({ children }: ILayout) => {
   const theme = useMantineTheme();
+
   // TODO: replace this with fn.smallerThan
   const isMobile = useMediaQuery('(max-width: 30em)');
+
+  const { instance } = useMsal();
+  const handleLogoutRedirect = () => {
+    instance.logoutRedirect();
+  };
 
   return (
     <>
@@ -36,7 +43,7 @@ const Layout = ({ children }: ILayout) => {
               </ActionIcon>
             )}
             <Divider orientation="vertical" size="sm" />
-            <ActionIcon variant="transparent" size="lg">
+            <ActionIcon variant="transparent" size="lg" onClick={handleLogoutRedirect}>
               <IconLogout />
             </ActionIcon>
           </Group>
