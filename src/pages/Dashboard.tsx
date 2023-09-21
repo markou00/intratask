@@ -37,7 +37,7 @@ const Dashboard = () => (
       >
         <Paper radius="md" shadow="sm" withBorder>
           <Title order={3} mt="sm" ta="center">
-            Monthly Deviation Chart
+            Årlig kategori andel
           </Title>
           <Box h={400}>
             <SimplePieChart />
@@ -45,7 +45,7 @@ const Dashboard = () => (
         </Paper>
         <Paper radius="md" shadow="sm" withBorder>
           <Title order={3} mt="sm" ta="center">
-            Monthly Deviation Chart
+            Månedelig avvik oversikt
           </Title>
           <Box h={400}>
             <SimpleAreaChart />
@@ -55,7 +55,7 @@ const Dashboard = () => (
       <SimpleGrid cols={1} bg="white">
         <Paper radius="md" shadow="sm" withBorder>
           <Title order={3} mt="sm" ta="center">
-            Monthly Deviation Chart
+            Månedelig kategori oversikt
           </Title>
           <Box h={500}>
             <StackedBarChart />
