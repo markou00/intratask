@@ -1,21 +1,16 @@
 import { IPublicClientApplication } from '@azure/msal-browser';
 import { AuthenticatedTemplate, MsalProvider, UnauthenticatedTemplate } from '@azure/msal-react';
-import { Button } from '@mantine/core';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { ThemeProvider } from './ThemeProvider';
-import { loginRequest } from './authConfig';
 import { FilterProvider } from './context/FilterContext';
 import Dashboard from './pages/Dashboard';
+import Welcome from './pages/Welcome';
 
 interface IApp {
   msalInstance: IPublicClientApplication;
 }
 
 export default function App({ msalInstance }: IApp) {
-  const handleLoginRedirect = () => {
-    msalInstance.loginRedirect(loginRequest);
-  };
-
   return (
     <MsalProvider instance={msalInstance}>
       <ThemeProvider>
@@ -31,7 +26,7 @@ export default function App({ msalInstance }: IApp) {
                     </FilterProvider>
                   </AuthenticatedTemplate>
                   <UnauthenticatedTemplate>
-                    <Button onClick={handleLoginRedirect}>Login</Button>
+                    <Welcome />
                   </UnauthenticatedTemplate>
                 </>
               }
