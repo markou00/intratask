@@ -1,6 +1,7 @@
+import { Alert, Flex } from '@mantine/core';
+import { IconAlertCircle } from '@tabler/icons-react';
 import { Cell, Legend, Pie, PieChart, ResponsiveContainer } from 'recharts';
 import { useFilters } from '../../context/FilterContext';
-import { filterByYear } from '../../utils/filter';
 
 const data = [
   { year: 2022, name: 'HMS', value: 400 },
@@ -51,30 +52,41 @@ const aggregateDataByCategory = (chartData: any[]) =>
 const SimplePieChart = () => {
   const { filters } = useFilters();
 
-  let filteredData = filterByYear(filters, data);
+  // Basic function to filter data by year
+  let filteredData = filters.length
+    ? data.filter((d) => filters.includes(d.year.toString()))
+    : data;
 
   // Check if there's no filter applied based on the length of the filtered data
   if (filteredData.length === data.length) filteredData = aggregateDataByCategory(filteredData);
 
   return (
     <ResponsiveContainer width="100%" height="100%">
-      <PieChart width={400} height={400}>
-        <Pie
-          data={filteredData}
-          cx="50%"
-          cy="50%"
-          labelLine={false}
-          label={renderCustomizedLabel}
-          outerRadius={80}
-          fill="#8884d8"
-          dataKey="value"
-        >
-          {data.map((entry, index) => (
-            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-          ))}
-        </Pie>
-        <Legend />
-      </PieChart>
+      {filteredData.length ? (
+        <PieChart width={400} height={400}>
+          <Pie
+            data={filteredData}
+            cx="50%"
+            cy="50%"
+            labelLine={false}
+            label={renderCustomizedLabel}
+            outerRadius={80}
+            fill="#8884d8"
+            dataKey="value"
+          >
+            {data.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+            ))}
+          </Pie>
+          <Legend />
+        </PieChart>
+      ) : (
+        <Flex h="100%" align="center" justify="center">
+          <Alert icon={<IconAlertCircle size="1rem" />}>
+            Det finnes ingen data for det valgte året
+          </Alert>
+        </Flex>
+      )}
     </ResponsiveContainer>
   );
 };
