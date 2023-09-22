@@ -11,6 +11,7 @@ import {
   YAxis,
 } from 'recharts';
 import { useFilters } from '../../context/FilterContext';
+import { filterByYear } from '../../utils/filter';
 
 const data = [
   {
@@ -78,10 +79,7 @@ const data = [
 const SimpleAreaChart = () => {
   const { filters } = useFilters();
 
-  // Basic filtering by year
-  const filteredData = filters.length
-    ? data.filter((d) => filters.includes(d.year.toString()))
-    : data;
+  const filteredData = filterByYear(filters, data);
 
   return (
     <ResponsiveContainer width="100%" height="100%">
