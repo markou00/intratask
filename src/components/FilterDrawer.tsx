@@ -1,4 +1,4 @@
-import { Box, Button, Drawer, Flex, NativeSelect, ScrollArea } from '@mantine/core';
+import { Box, Button, Drawer, Flex, ScrollArea, Select } from '@mantine/core';
 import { useState } from 'react';
 import { useFilters } from '../context/FilterContext';
 
@@ -39,12 +39,7 @@ const FilterDrawer = ({ opened, close }: IFilterDrawer) => {
           <Drawer.CloseButton />
         </Drawer.Header>
         <Drawer.Body mb={50}>
-          <NativeSelect
-            value={year}
-            onChange={(event) => setYear(event.currentTarget.value)}
-            data={data}
-            label="Velg år"
-          />
+          <Select label="Dato" data={data} value={year} onChange={(value) => setYear(value!)} />
         </Drawer.Body>
         <Box
           sx={(theme) => ({
