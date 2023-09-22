@@ -10,11 +10,11 @@ const data = [
   { year: 2022, name: 'Intern', value: 200 },
   { year: 2021, name: 'HMS', value: 400 },
   { year: 2021, name: 'Kvalitet', value: 300 },
-  { year: 2022, name: 'Ytremiljø', value: 300 },
+  { year: 2023, name: 'Ytremiljø', value: 300 },
   { year: 2023, name: 'Intern', value: 200 },
 ];
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#EE9123'];
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
 const RADIAN = Math.PI / 180;
 const renderCustomizedLabel = ({
