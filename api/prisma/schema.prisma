@@ -1,0 +1,35 @@
+datasource db {
+  provider          = "sqlserver"
+  url               = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Ticket {
+  id                Int                 @id
+  createdAt         DateTime
+  subject           String
+  description       String
+  descriptionVector DescriptionVector[]
+  status            String
+  tags              Tag[]
+}
+
+model DescriptionVector {
+  ticketId      Int
+  vectorValueId Int
+  vectorValue   Float
+  ticket        Ticket @relation(fields: [ticketId], references: [id])
+
+  @@id([ticketId, vectorValueId])
+}
+
+model Tag {
+  id       Int    @id @default(autoincrement())
+  name     String
+  ticketId Int
+  ticket   Ticket @relation(fields: [ticketId], references: [id])
+}
