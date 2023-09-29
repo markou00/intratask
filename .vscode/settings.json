@@ -1,6 +1,6 @@
 {
   "azureFunctions.deploySubpath": "api",
-  "azureFunctions.postDeployTask": "npm instal",
+  "azureFunctions.postDeployTask": "npm install",
   "azureFunctions.projectLanguage": "TypeScript",
   "azureFunctions.projectRuntime": "~4",
   "debug.internalConsoleOptions": "neverOpen",

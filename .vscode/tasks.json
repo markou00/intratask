@@ -2,6 +2,43 @@
   "version": "2.0.0",
   "tasks": [
     {
+      "type": "shell",
+      "label": "npm build",
+      "command": "npm run build",
+      "dependsOn": "npm clean",
+      "problemMatcher": "$tsc",
+      "options": {
+        "cwd": "${workspaceFolder}/api"
+      }
+    },
+    {
+      "type": "shell",
+      "label": "npm install",
+      "command": "npm install",
+      "options": {
+        "cwd": "${workspaceFolder}/api"
+      }
+    },
+    {
+      "type": "shell",
+      "label": "npm prune",
+      "command": "npm prune --production",
+      "dependsOn": "npm build",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}/api"
+      }
+    },
+    {
+      "type": "shell",
+      "label": "npm clean",
+      "command": "npm run clean",
+      "dependsOn": "npm install",
+      "options": {
+        "cwd": "${workspaceFolder}/api"
+      }
+    },
+    {
       "type": "func",
       "label": "func: host start",
       "command": "host start",
