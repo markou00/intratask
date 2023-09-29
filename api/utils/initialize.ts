@@ -44,3 +44,21 @@ export const requestTickets = async () => {
 
   return allTickets;
 };
+
+/**
+ * Filters the given tickets to return only the tickets which includes
+ * the specified tags in them.
+ *
+ * @param tickets The tickets to filter.
+ * @returns An array containing ticket objects with the required filter
+ */
+export const filterTickets = (tickets) =>
+  tickets.filter((ticket) =>
+    ticket.tags.some((tag) =>
+      [
+        "a_-_driftsstans/kritisk_feil",
+        "b_-_alvorlig_feil/mangel",
+        "c_-_mindre_feil/mangel",
+      ].includes(tag)
+    )
+  );
