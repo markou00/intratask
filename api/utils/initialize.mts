@@ -1,3 +1,6 @@
+// This file extension must be mts because "@xenova/transformers" uses es modules
+
+import { pipeline } from "@xenova/transformers";
 import axios from "axios";
 
 /**
@@ -49,7 +52,7 @@ export const requestTickets = async () => {
  * Filters the given tickets to return only the tickets which includes
  * the specified tags in them.
  *
- * @param tickets The tickets to filter.
+ * @param tickets An array containing ticket objects
  * @returns An array containing ticket objects with the required filter
  */
 export const filterTickets = (tickets) =>
@@ -62,3 +65,28 @@ export const filterTickets = (tickets) =>
       ].includes(tag)
     )
   );
+
+/**
+ * Create embeddings of the description field of the given tickets
+ *
+ * @param tickets An array containing ticket objects
+ * @returns An array containing ticket objects with additional field descriptionVector which contains the embeddings
+ */
+export const createDescriptionEmbeddings = async (tickets) => {
+  // Initialize the generateEmbeddings pipeline
+  const generateEmbeddings = await pipeline(
+    "feature-extraction",
+    "Xenova/all-MiniLM-L6-v2"
+  );
+
+  // Generate embeddings for the description of each ticket
+  for (let ticket of tickets) {
+    const output = await generateEmbeddings(ticket.description, {
+      pooling: "mean",
+      normalize: true,
+    });
+    ticket.descriptionVector = output.data;
+  }
+
+  return tickets;
+};
