@@ -81,11 +81,15 @@ export const createDescriptionEmbeddings = async (tickets) => {
 
   // Generate embeddings for the description of each ticket
   for (let ticket of tickets) {
-    const output = await generateEmbeddings(ticket.description, {
+    const { data } = await generateEmbeddings(ticket.description, {
       pooling: "mean",
       normalize: true,
     });
-    ticket.descriptionVector = output.data;
+
+    // convert the embeddings object into a string[]
+    const vector = Object.values(data).map((value) => value.toString());
+
+    ticket.descriptionVector = vector;
   }
 
   return tickets;
