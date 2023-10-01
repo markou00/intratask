@@ -2,6 +2,7 @@
 
 import { pipeline } from "@xenova/transformers";
 import axios from "axios";
+import { prisma } from "../shared/prisma.js";
 
 /**
  * Get all the tickets from Zendesk which was created after 2020.
@@ -39,6 +40,8 @@ export const requestTickets = async () => {
     }
 
     allTickets = allTickets.concat(data.tickets);
+
+    // to keep track of how many tickets have been fetched
     console.log(allTickets.length);
 
     prevUrl = url;
@@ -93,4 +96,65 @@ export const createDescriptionEmbeddings = async (tickets) => {
   }
 
   return tickets;
+};
+
+/**
+ * Given an array of tickets, inserts the tickets in the database. If a
+ * ticket already exists in the database, the tickets will be skipped.
+ *
+ * @param tickets
+ */
+export const insertInitialData = async (tickets) => {
+  let recordCounter = 0;
+
+  for (const ticket of tickets) {
+    // Check if a Ticket with the same id already exists
+    const existingTicket = await prisma.ticket.findUnique({
+      where: {
+        id: ticket.id,
+      },
+    });
+
+    // If the Ticket already exists, skip to the next iteration
+    if (existingTicket) {
+      console.log(`Ticket with id ${ticket.id} already exists.`);
+      continue;
+    }
+
+    // First, create the Ticket record. This MUST be created first
+    const createdTicket = await prisma.ticket.create({
+      data: {
+        id: ticket.id,
+        createdAt: new Date(ticket.created_at),
+        subject: ticket.subject,
+        description: ticket.description,
+        status: ticket.status,
+      },
+    });
+
+    // Increment the counter for each Ticket record created
+    recordCounter += 1;
+
+    // Next, create the associated Tag records
+    await prisma.tag.createMany({
+      data: ticket.tags.map((tagName) => ({
+        name: tagName,
+        ticketId: createdTicket.id,
+      })),
+    });
+
+    // Finally, create the associated DescriptionVector records
+    await prisma.descriptionVector.createMany({
+      data: ticket.descriptionVector.map((value) => ({
+        vectorValue: value,
+        ticketId: createdTicket.id,
+      })),
+    });
+
+    // Check if the counter is a multiple of 1000 and log to the console
+    // To keep track of how many tickets have been inserted in the DB
+    if (recordCounter % 1000 === 0) {
+      console.log(`${recordCounter} records have been inserted.`);
+    }
+  }
 };
