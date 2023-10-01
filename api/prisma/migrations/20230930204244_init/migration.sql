@@ -14,10 +14,11 @@ CREATE TABLE [dbo].[Ticket] (
 
 -- CreateTable
 CREATE TABLE [dbo].[DescriptionVector] (
+    [id] INT NOT NULL IDENTITY(1,1),
     [ticketId] INT NOT NULL,
-    [vectorValueId] INT NOT NULL,
     [vectorValue] FLOAT(53) NOT NULL,
-    CONSTRAINT [DescriptionVector_pkey] PRIMARY KEY CLUSTERED ([ticketId],[vectorValueId])
+    CONSTRAINT [DescriptionVector_pkey] PRIMARY KEY CLUSTERED ([id]),
+    CONSTRAINT [DescriptionVector_ticketId_id_key] UNIQUE NONCLUSTERED ([ticketId],[id])
 );
 
 -- CreateTable

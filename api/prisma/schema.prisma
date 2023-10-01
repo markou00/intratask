@@ -12,19 +12,19 @@ model Ticket {
   id                Int                 @id
   createdAt         DateTime
   subject           String
-  description       String
+  description       String              @db.VarChar(max)
   descriptionVector DescriptionVector[]
   status            String
   tags              Tag[]
 }
 
 model DescriptionVector {
-  ticketId      Int
-  vectorValueId Int
-  vectorValue   Float
-  ticket        Ticket @relation(fields: [ticketId], references: [id])
+  id          Int    @id @default(autoincrement())
+  ticketId    Int
+  vectorValue String
+  ticket      Ticket @relation(fields: [ticketId], references: [id])
 
-  @@id([ticketId, vectorValueId])
+  @@unique([ticketId, id])
 }
 
 model Tag {
