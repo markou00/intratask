@@ -7,7 +7,7 @@ CREATE TABLE [dbo].[Ticket] (
     [id] INT NOT NULL,
     [createdAt] DATETIME2 NOT NULL,
     [subject] NVARCHAR(1000) NOT NULL,
-    [description] NVARCHAR(1000) NOT NULL,
+    [description] VARCHAR(max) NOT NULL,
     [status] NVARCHAR(1000) NOT NULL,
     CONSTRAINT [Ticket_pkey] PRIMARY KEY CLUSTERED ([id])
 );
@@ -16,7 +16,7 @@ CREATE TABLE [dbo].[Ticket] (
 CREATE TABLE [dbo].[DescriptionVector] (
     [id] INT NOT NULL IDENTITY(1,1),
     [ticketId] INT NOT NULL,
-    [vectorValue] FLOAT(53) NOT NULL,
+    [vectorValue] NVARCHAR(1000) NOT NULL,
     CONSTRAINT [DescriptionVector_pkey] PRIMARY KEY CLUSTERED ([id]),
     CONSTRAINT [DescriptionVector_ticketId_id_key] UNIQUE NONCLUSTERED ([ticketId],[id])
 );
