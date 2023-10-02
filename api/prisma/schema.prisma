@@ -16,6 +16,8 @@ model Ticket {
   descriptionVector DescriptionVector[]
   status            String
   tags              Tag[]
+  Deviation         Deviation?          @relation(fields: [deviationId], references: [id])
+  deviationId       Int?
 }
 
 model DescriptionVector {
@@ -32,4 +34,11 @@ model Tag {
   name     String
   ticketId Int
   ticket   Ticket @relation(fields: [ticketId], references: [id])
+}
+
+model Deviation {
+  id      Int      @id @default(autoincrement())
+  creator String
+  date    DateTime @default(now())
+  tickets Ticket[]
 }
