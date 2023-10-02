@@ -5,7 +5,10 @@ import axios from "axios";
 import { prisma } from "../shared/prisma.js";
 
 /**
- * Get all the tickets from Zendesk which was created after 2020.
+ * Get all the tickets from Zendesk which was created after 2021.
+ * For some reason Zendesk API still returns tickets which was created before
+ * the specified data. Therefore the function will iterate over the data and
+ * make sure to return only the tickets created after 2021.
  *
  * @returns An array containing ticket objects
  */
@@ -14,8 +17,8 @@ export const requestTickets = async () => {
   const api_token = process.env.ZENDESK_API_TOKEN;
   const subdomain = process.env.ZENDESK_SUBDOMAIN;
 
-  // Request all tickets created from 2020 (1577836800)
-  let url = `https://${subdomain}.zendesk.com/api/v2/incremental/tickets.json?start_time=1577836800`;
+  // Request all tickets created from 2021 (1609459200)
+  let url = `https://${subdomain}.zendesk.com/api/v2/incremental/tickets.json?start_time=1609459200`;
 
   const headers = {
     Authorization: `Basic ${Buffer.from(
@@ -39,7 +42,14 @@ export const requestTickets = async () => {
       break;
     }
 
-    allTickets = allTickets.concat(data.tickets);
+    // Filter the tickets from the current request
+    const filteredTickets = data.tickets.filter((ticket) => {
+      return (
+        new Date(ticket.created_at) >= new Date("2021-01-01T00:00:00.000Z")
+      );
+    });
+
+    allTickets = allTickets.concat(filteredTickets);
 
     // to keep track of how many tickets have been fetched
     console.log(allTickets.length);
