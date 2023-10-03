@@ -291,3 +291,53 @@ export const findSimilarTickets = (tickets) => {
 
   return similarTicketsMap;
 };
+
+/**
+ * Inserts a new Deviation record and associates tickets with the created Deviation.
+ *
+ * This function iterates over a map of tickets and their similar tickets. For each ticket and its similar tickets:
+ * 1. A new Deviation record is created in the database.
+ * 2. The ticket and its similar tickets are updated to be associated with the newly created Deviation.
+ *
+ * If there's an error during the process, it logs the error and continues with the next set of tickets.
+ *
+ * @function
+ * @export
+ * @async
+ * @param {Map<Object, Array<Object>>} similarTicketsMap - A map where the key is a ticket and the value is an array of tickets that are similar to the key ticket.
+ * @returns {void}
+ * @throws {Error} - Logs an error if there's an issue creating a Deviation or updating tickets.
+ */
+
+export const insertDeviationAndUpdateTickets = async (similarTicketsMap) => {
+  for (const [ticketA, similarTickets] of similarTicketsMap) {
+    try {
+      // Create a new Deviation record
+      const newDeviation = await prisma.deviation.create({
+        data: {
+          creator: "system",
+        },
+      });
+
+      // Get the ids of the tickets to be associated with the new Deviation
+      const ticketIds = [
+        ticketA.id,
+        ...similarTickets.map((ticket) => ticket.ticketB.id),
+      ];
+
+      // Associate the tickets with the new Deviation
+      await prisma.ticket.updateMany({
+        where: {
+          id: {
+            in: ticketIds,
+          },
+        },
+        data: {
+          deviationId: newDeviation.id,
+        },
+      });
+    } catch (error) {
+      console.error("Error creating Deviation or updating Tickets:", error);
+    }
+  }
+};
