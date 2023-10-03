@@ -1,11 +1,13 @@
 import { AzureFunction, Context, HttpRequest } from "@azure/functions";
+import { prisma } from "../shared/prisma.js";
 import {
   createDescriptionEmbeddings,
   filterTickets,
+  findSimilarTickets,
+  insertDeviationAndUpdateTickets,
   insertInitialData,
   requestTickets,
 } from "../utils/initialize.mjs";
-import { prisma } from "../shared/prisma.js";
 
 interface HttpResponse {
   status: number;
@@ -21,6 +23,8 @@ interface HttpResponse {
  * 3. Filters the fetched tickets based on specified tags.
  * 4. Generates embeddings for the descriptions of the filtered tickets.
  * 5. Inserts the filtered tickets with embeddings into the database.
+ * 6. Finds deviations based on the similarity between tickets
+ * 7. Inserts founded deviations in the database and associates the related ticket with the deviation
  *
  * @function
  * @async
@@ -41,19 +45,34 @@ const InitApplication: AzureFunction = async function (
       return;
     }
 
-    // 2. Get all the tickets which was created after 2020
+    // 2. Get all the tickets which was created after 2021
     const allTickets = await requestTickets();
+    console.warn("Tickets have been fetched successfully");
 
     // 3. Filter the tickets based on the specified tags
     const filteredTickets = filterTickets(allTickets);
+    console.warn("Tickets have been filtered");
 
-    // 4. Generate embedding of the ticket's description
+    // 4. Generate embeddings of the tickets' descriptions
     const filteredTicketsWithEmbeddings = await createDescriptionEmbeddings(
       filteredTickets
     );
+    console.warn("Embeddings was generated successfully");
 
     // 5. insert the tickets in the DB
     await insertInitialData(filteredTicketsWithEmbeddings);
+    console.warn("Tickets have been inserted to the database");
+
+    // 6. find deviations based on the filtered data
+    const similarTicketsMap = findSimilarTickets(
+      filteredTicketsWithEmbeddings,
+      false
+    );
+    console.warn("Done searching for similar tickets");
+
+    // 7. insert any generated deviations
+    await insertDeviationAndUpdateTickets(similarTicketsMap);
+    console.warn("Deviations have been created and tickets were updated");
 
     return {
       status: 200,
