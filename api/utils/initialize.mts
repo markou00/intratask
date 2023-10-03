@@ -7,7 +7,7 @@ import { prisma } from "../shared/prisma.js";
 /**
  * Get all the tickets from Zendesk which was created after 2021.
  * For some reason Zendesk API still returns tickets which was created before
- * the specified data. Therefore the function will iterate over the data and
+ * the specified date. Therefore the function will iterate over the data and
  * make sure to return only the tickets created after 2021.
  *
  * @returns An array containing ticket objects
@@ -119,6 +119,11 @@ export const insertInitialData = async (tickets) => {
 
   for (const ticket of tickets) {
     // Check if a Ticket with the same id already exists
+    // This important because Zendesk sometimes return duplicated tickets
+    /**
+     * TODO: Since this function is only used in the context of initialization, instead of checking for duplicated tickets by sending a request to the DB, check the array of fetched tickets from Zendesk. This can save some time while initializing the app.
+     *
+     */
     const existingTicket = await prisma.ticket.findUnique({
       where: {
         id: ticket.id,
@@ -168,3 +173,37 @@ export const insertInitialData = async (tickets) => {
     }
   }
 };
+
+/**
+ * Calculates the dot product of two arrays of strings representing numbers.
+ *
+ * This function takes in two arrays of strings, converts each string to a number, and then computes the dot product.
+ * Both arrays must have the same length, and all strings in the arrays must be convertible to valid numbers.
+ *
+ * @function
+ * @param {string[]} a - The first array of strings representing numbers.
+ * @param {string[]} b - The second array of strings representing numbers.
+ * @returns {number} - The dot product of the two arrays.
+ * @throws {Error} - Throws an error if the two arrays have different lengths.
+ * @throws {Error} - Throws an error if any string in the arrays cannot be converted to a valid number.
+ */
+function dotProduct(a: string[], b: string[]) {
+  if (a.length !== b.length) {
+    throw new Error("Both arguments must have the same length");
+  }
+
+  let result = 0;
+
+  for (let i = 0; i < a.length; i++) {
+    const numA = parseFloat(a[i]);
+    const numB = parseFloat(b[i]);
+
+    if (isNaN(numA) || isNaN(numB)) {
+      throw new Error("Invalid number in input arrays");
+    }
+
+    result += numA * numB;
+  }
+
+  return result;
+}
