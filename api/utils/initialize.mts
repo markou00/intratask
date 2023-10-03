@@ -30,6 +30,10 @@ export const requestTickets = async () => {
   let allTickets = [];
   let prevUrl = "";
 
+  // Use a Set to keep track of unique ticket IDs
+  // This is important because Zendesk returns duplicated tickets
+  const uniqueTicketIds = new Set();
+
   // this is necessary due to Zendesk returning only 1000 tickets per request.
   // the loop will keep requesting the url to the next 1000 tickets until
   // the url is constant which means there is no more tickets.
@@ -45,9 +49,13 @@ export const requestTickets = async () => {
     // Filter the tickets from the current request
     const filteredTickets = data.tickets.filter((ticket) => {
       return (
-        new Date(ticket.created_at) >= new Date("2021-01-01T00:00:00.000Z")
+        new Date(ticket.created_at) >= new Date("2021-01-01T00:00:00.000Z") &&
+        !uniqueTicketIds.has(ticket.id) // Ensure the ticket ID is unique
       );
     });
+
+    // Add the unique ticket IDs to the Set
+    filteredTickets.forEach((ticket) => uniqueTicketIds.add(ticket.id));
 
     allTickets = allTickets.concat(filteredTickets);
 
@@ -118,24 +126,6 @@ export const insertInitialData = async (tickets) => {
   let recordCounter = 0;
 
   for (const ticket of tickets) {
-    // Check if a Ticket with the same id already exists
-    // This important because Zendesk sometimes return duplicated tickets
-    /**
-     * TODO: Since this function is only used in the context of initialization, instead of checking for duplicated tickets by sending a request to the DB, check the array of fetched tickets from Zendesk. This can save some time while initializing the app.
-     *
-     */
-    const existingTicket = await prisma.ticket.findUnique({
-      where: {
-        id: ticket.id,
-      },
-    });
-
-    // If the Ticket already exists, skip to the next iteration
-    if (existingTicket) {
-      console.log(`Ticket with id ${ticket.id} already exists.`);
-      continue;
-    }
-
     // First, create the Ticket record. This MUST be created first
     const createdTicket = await prisma.ticket.create({
       data: {
