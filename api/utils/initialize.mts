@@ -207,3 +207,87 @@ function dotProduct(a: string[], b: string[]) {
 
   return result;
 }
+
+/**
+ * Finds and groups similar tickets based on their description vectors.
+ *
+ * This function compares the description vectors of each ticket with every other ticket in the list.
+ * If the dot product of the vectors is greater than or equal to a predefined threshold, the tickets are considered similar.
+ * The function returns a map where each key is a ticket and the value is an array of tickets that are similar to the key ticket.
+ * The function ensures that each ticket appears only once in the map and that each group of similar tickets contains at least 20 tickets.
+ *
+ * @function
+ * @export
+ * @param {Array<Object>} tickets - An array of ticket objects. Each ticket object should have a `descriptionVector` property which is an array of objects with a `vectorValue` property.
+ * @returns {Map<Object, Array<Object>>} - A map where the key is a ticket and the value is an array of tickets that are similar to the key ticket. Only groups with 20 or more similar tickets are included in the map.
+ */
+export const findSimilarTickets = (tickets) => {
+  // This threshold is based on experiments done on the dataset.
+  const threshold = 0.77;
+
+  // Create a map to hold similar tickets for each ticket
+  const similarTicketsMap = new Map();
+
+  // Create a set to keep track of tickets that have been added to the map
+  const addedTickets = new Set();
+
+  for (let i = 0; i < tickets.length; i++) {
+    const ticketA = tickets[i];
+    const vectorA = ticketA.descriptionVector.map(
+      (object) => object.vectorValue
+    );
+
+    // Skip this iteration if ticketA has already been added to the map
+    if (addedTickets.has(ticketA)) {
+      continue;
+    }
+
+    // Initialize an entry in the map for ticketA
+    similarTicketsMap.set(ticketA, []);
+
+    for (let j = i + 1; j < tickets.length; j++) {
+      const ticketB = tickets[j];
+      const vectorB = ticketB.descriptionVector.map(
+        (object) => object.vectorValue
+      );
+
+      const dotProductValue = dotProduct(vectorA, vectorB);
+
+      if (dotProductValue >= threshold) {
+        // Get the current similar tickets array for ticketA from the map
+        const similarTickets = similarTicketsMap.get(ticketA);
+
+        // Skip this iteration if ticketB has already been added to the map
+        if (addedTickets.has(ticketB)) {
+          continue;
+        }
+
+        // Add the new similar ticket to the array
+        similarTickets.push({
+          ticketB,
+        });
+
+        // Update the map with the new array
+        similarTicketsMap.set(ticketA, similarTickets);
+
+        // Add ticketB to addedTickets set
+        addedTickets.add(ticketB);
+
+        // Check if similarTickets has 20 or more entries
+        if (similarTickets.length >= 20) {
+          // Break out of the inner loop as there's no need to continue comparing ticketA with ticketB
+          break;
+        }
+      }
+    }
+  }
+
+  // delete all entries with fewer than 20 items
+  for (const [key, similarTickets] of similarTicketsMap) {
+    if (similarTickets.length < 20) {
+      similarTicketsMap.delete(key);
+    }
+  }
+
+  return similarTicketsMap;
+};
