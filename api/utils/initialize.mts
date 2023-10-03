@@ -60,7 +60,7 @@ export const requestTickets = async () => {
     allTickets = allTickets.concat(filteredTickets);
 
     // to keep track of how many tickets have been fetched
-    console.log(allTickets.length);
+    console.log(`INFO: Fetching tickets: ${allTickets.length}...`);
 
     prevUrl = url;
     url = data.next_page;
@@ -177,7 +177,7 @@ export const insertInitialData = async (tickets) => {
  * @throws {Error} - Throws an error if the two arrays have different lengths.
  * @throws {Error} - Throws an error if any string in the arrays cannot be converted to a valid number.
  */
-function dotProduct(a: string[], b: string[]) {
+export const dotProduct = (a: string[], b: string[]) => {
   if (a.length !== b.length) {
     throw new Error("Both arguments must have the same length");
   }
@@ -196,7 +196,7 @@ function dotProduct(a: string[], b: string[]) {
   }
 
   return result;
-}
+};
 
 /**
  * Finds and groups similar tickets based on their description vectors.
@@ -209,9 +209,10 @@ function dotProduct(a: string[], b: string[]) {
  * @function
  * @export
  * @param {Array<Object>} tickets - An array of ticket objects. Each ticket object should have a `descriptionVector` property which is an array of objects with a `vectorValue` property.
+ * @param {boolean} isFromDB - Whether the tickets data has been fetched from DB (true) or from Zendesk (false)
  * @returns {Map<Object, Array<Object>>} - A map where the key is a ticket and the value is an array of tickets that are similar to the key ticket. Only groups with 20 or more similar tickets are included in the map.
  */
-export const findSimilarTickets = (tickets) => {
+export const findSimilarTickets = (tickets, isFromDB) => {
   // This threshold is based on experiments done on the dataset.
   const threshold = 0.77;
 
@@ -223,9 +224,10 @@ export const findSimilarTickets = (tickets) => {
 
   for (let i = 0; i < tickets.length; i++) {
     const ticketA = tickets[i];
-    const vectorA = ticketA.descriptionVector.map(
-      (object) => object.vectorValue
-    );
+    const vectorA = isFromDB
+      ? ticketA.descriptionVector.map((object) => object.vectorValue)
+      : // when used in init process, descriptionVector is a string[]
+        ticketA.descriptionVector;
 
     // Skip this iteration if ticketA has already been added to the map
     if (addedTickets.has(ticketA)) {
@@ -237,9 +239,10 @@ export const findSimilarTickets = (tickets) => {
 
     for (let j = i + 1; j < tickets.length; j++) {
       const ticketB = tickets[j];
-      const vectorB = ticketB.descriptionVector.map(
-        (object) => object.vectorValue
-      );
+      const vectorB = isFromDB
+        ? ticketB.descriptionVector.map((object) => object.vectorValue)
+        : // when used in init process, descriptionVector is a string[]
+          ticketB.descriptionVector;
 
       const dotProductValue = dotProduct(vectorA, vectorB);
 
