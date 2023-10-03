@@ -341,3 +341,40 @@ export const insertDeviationAndUpdateTickets = async (similarTicketsMap) => {
     }
   }
 };
+
+/**
+ * Retrieves all tickets from the database in chunks.
+ *
+ * This function fetches tickets from the database in chunks of a specified size (e.g., 2000 tickets at a time).
+ * It continues to fetch tickets in chunks until there are no more tickets left to retrieve.
+ * Each chunk includes the `descriptionVector` associated with the tickets.
+ *
+ * @function
+ * @export
+ * @async
+ * @returns {Array<Object>} - An array containing all the tickets retrieved from the database. Each ticket object includes its associated `descriptionVector`.
+ */
+export const getAllTicketsInChunks = async () => {
+  let skip = 0;
+  const take = 2000;
+  let tickets = [];
+  let moreData = true;
+
+  while (moreData) {
+    const chunk = await prisma.ticket.findMany({
+      include: {
+        descriptionVector: true,
+      },
+      take: take,
+      skip: skip,
+    });
+
+    if (chunk.length > 0) {
+      tickets = tickets.concat(chunk);
+      skip += take; // Update the skip value for the next iteration
+    } else {
+      moreData = false; // No more data to retrieve, exit the loop
+    }
+  }
+  return tickets;
+};
