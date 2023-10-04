@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   extends: ['mantine'],
   parserOptions: {
     project: './web/tsconfig.json',
@@ -6,5 +6,4 @@ module.exports = {
   rules: {
     'react/react-in-jsx-scope': 'off',
   },
-  ignorePatterns: ['.eslintrc.js'],
 };
