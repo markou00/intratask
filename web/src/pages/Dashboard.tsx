@@ -1,66 +1,59 @@
-import { Box, Container, Paper, SimpleGrid, Title } from '@mantine/core';
+import { Box, Container, Paper, SimpleGrid, Text, Title } from '@mantine/core';
 import StatsCard from '../components/StatsCard/StatsCard';
 
+import { useQuery } from '@tanstack/react-query';
 import ActiveFilters from '../components/ActiveFilters';
 import SimpleAreaChart from '../components/charts/SimpleAreaChart';
 import SimplePieChart from '../components/charts/SimplePieChart';
 import StackedBarChart from '../components/charts/StackedBarChart';
 import Layout from '../components/layout/Layout';
 import { useFilters } from '../context/FilterContext';
-
-const CREATED = 'Opprettet avvik';
-const SOLVED = 'Løste avvik';
-const UNSOLVED = 'Uløste avvik';
-const ZENDESK = 'Avvik fra Zendesk';
-
-interface DataItem {
-  year: number;
-  type: string;
-  value: number;
-}
-
-const data: DataItem[] = [
-  { year: 2022, type: 'Opprettet avvik', value: 400 },
-  { year: 2022, type: 'Løste avvik', value: 300 },
-  { year: 2022, type: 'Uløste avvik', value: 300 },
-  { year: 2022, type: 'Avvik fra Zendesk', value: 200 },
-  { year: 2021, type: 'Opprettet avvik', value: 200 },
-  { year: 2021, type: 'Løste avvik', value: 100 },
-  { year: 2021, type: 'Uløste avvik', value: 150 },
-  { year: 2021, type: 'Avvik fra Zendesk', value: 250 },
-];
-
-const aggregateDataByType = (statsCardData: DataItem[], type: string) =>
-  statsCardData.filter((item) => item.type === type).reduce((sum, curr) => sum + curr.value, 0);
+import { getDeviations } from '../services/DeviationService';
 
 const Dashboard = () => {
+  const deviationsQuery = useQuery({
+    queryKey: ['deviations'],
+    queryFn: () => getDeviations(),
+  });
+
   const { filters } = useFilters();
 
+  if (deviationsQuery.isLoading) {
+    return <Text>Loading...</Text>;
+  }
+
+  if (deviationsQuery.isError) {
+    return <Text>Error...</Text>;
+  }
+
+  const deviations = deviationsQuery.data;
+
   // Basic function to filter data by year
-  const filteredData = filters.length
-    ? data.filter((d) => filters.includes(d.year.toString()))
-    : data;
+  const filteredDeviations = filters.length
+    ? deviations.filter(
+        (deviation: any) =>
+          new Date(deviation?.createdAt).getFullYear().toString() === filters.at(0)
+      )
+    : deviations;
 
   // Check if filters are applied
-  const noFilterApplied = filteredData.length === data.length;
-
-  // Helper function to get sum of values for a specific type from filtered data
-  const getSumOfValuesForType = (type: string) =>
-    filteredData.filter((item) => item.type === type).reduce((sum, curr) => sum + curr.value, 0);
+  const noFilterApplied = filteredDeviations.length === deviations.length;
 
   // Calculate values based on whether a filter is applied
-  const createdValue = noFilterApplied
-    ? aggregateDataByType(filteredData, CREATED)
-    : getSumOfValuesForType(CREATED);
+  const createdValue = noFilterApplied ? deviations.length : filteredDeviations.length;
+
   const solvedValue = noFilterApplied
-    ? aggregateDataByType(filteredData, SOLVED)
-    : getSumOfValuesForType(SOLVED);
+    ? deviations.filter((deviation: any) => deviation.isSolved).length
+    : filteredDeviations.filter((deviation: any) => deviation.isSolved).length;
+
   const unsolvedValue = noFilterApplied
-    ? aggregateDataByType(filteredData, UNSOLVED)
-    : getSumOfValuesForType(UNSOLVED);
+    ? deviations.filter((deviation: any) => !deviation.isSolved).length
+    : filteredDeviations.filter((deviation: any) => !deviation.isSolved).length;
+
   const zendeskValue = noFilterApplied
-    ? aggregateDataByType(filteredData, ZENDESK)
-    : getSumOfValuesForType(ZENDESK);
+    ? deviations.filter((deviation: any) => deviation.creator.toLowerCase() === 'zendesk').length
+    : filteredDeviations.filter((deviation: any) => deviation.creator.toLowerCase() === 'zendesk')
+        .length;
 
   return (
     <Layout>
@@ -76,10 +69,10 @@ const Dashboard = () => {
             { maxWidth: '36rem', cols: 1, spacing: 'sm' },
           ]}
         >
-          <StatsCard title={CREATED} variant="created" value={createdValue} />
-          <StatsCard title={SOLVED} variant="solved" value={solvedValue} />
-          <StatsCard title={UNSOLVED} variant="unsolved" value={unsolvedValue} />
-          <StatsCard title={ZENDESK} variant="zendesk" value={zendeskValue} />
+          <StatsCard title="Opprettet avvik" variant="created" value={createdValue} />
+          <StatsCard title="Løste avvik" variant="solved" value={solvedValue} />
+          <StatsCard title="Uløste avvik" variant="unsolved" value={unsolvedValue} />
+          <StatsCard title="Avvik fra Zendesk" variant="zendesk" value={zendeskValue} />
         </SimpleGrid>
         <SimpleGrid
           cols={2}
