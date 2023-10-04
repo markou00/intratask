@@ -308,7 +308,14 @@ export const insertDeviationAndUpdateTickets = async (similarTicketsMap) => {
       // Create a new Deviation record
       const newDeviation = await prisma.deviation.create({
         data: {
-          creator: "system",
+          creator: "Zendesk",
+          title: `Ticket #${ticketA.id} har flere lignende tickets`,
+          category: "Kvalitet",
+          description:
+            "Systemet har funnet flere potensielle gjentagende tickets",
+          priority: "Normal",
+          progress: 0,
+          status: "Ny",
         },
       });
 

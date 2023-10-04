@@ -34,7 +34,18 @@ CREATE TABLE [dbo].[Tag] (
 CREATE TABLE [dbo].[Deviation] (
     [id] INT NOT NULL IDENTITY(1,1),
     [creator] NVARCHAR(1000) NOT NULL,
-    [date] DATETIME2 NOT NULL CONSTRAINT [Deviation_date_df] DEFAULT CURRENT_TIMESTAMP,
+    [createdAt] DATETIME2 NOT NULL CONSTRAINT [Deviation_createdAt_df] DEFAULT CURRENT_TIMESTAMP,
+    [updatedAt] DATETIME2 NOT NULL,
+    [category] NVARCHAR(1000) NOT NULL,
+    [title] NVARCHAR(1000) NOT NULL,
+    [description] VARCHAR(max) NOT NULL,
+    [status] NVARCHAR(1000) NOT NULL,
+    [assigneeId] NVARCHAR(1000),
+    [solution] NVARCHAR(1000),
+    [isSolved] BIT NOT NULL CONSTRAINT [Deviation_isSolved_df] DEFAULT 0,
+    [solvedBy] NVARCHAR(1000),
+    [progress] INT NOT NULL,
+    [priority] NVARCHAR(1000) NOT NULL,
     CONSTRAINT [Deviation_pkey] PRIMARY KEY CLUSTERED ([id])
 );
 

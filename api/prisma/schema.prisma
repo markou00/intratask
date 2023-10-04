@@ -37,8 +37,19 @@ model Tag {
 }
 
 model Deviation {
-  id      Int      @id @default(autoincrement())
-  creator String
-  date    DateTime @default(now())
-  tickets Ticket[]
+  id          Int      @id @default(autoincrement())
+  creator     String // External system reference
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  tickets     Ticket[]
+  category    String
+  title       String
+  description String   @db.VarChar(max)
+  status      String
+  assigneeId  String? // External system reference
+  solution    String?
+  isSolved    Boolean  @default(false)
+  solvedBy    String? // External system reference
+  progress    Int
+  priority    String
 }
