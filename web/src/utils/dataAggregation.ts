@@ -72,3 +72,54 @@ export const aggregateDeviationsByMonth = (
   // Convert the aggregated data object back into an array
   return Object.values(aggregatedData);
 };
+
+/**
+ * Aggregate the deviations by month, year, and category.
+ *
+ * @param {Array} deviations - The array of deviations to aggregate.
+ * @return {Array} An array with aggregated data by month and category.
+ */
+export const aggregateDeviationsByMonthAndCategory = (deviations: Deviation[]) => {
+  const monthNames = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
+
+  // Transform each deviation into a grouping key: "YYYY-MM-category"
+  const transformedDeviations = deviations.map((deviation) => {
+    const date = new Date(deviation.createdAt);
+    return {
+      year: date.getFullYear(),
+      month: date.getMonth(),
+      monthName: monthNames[date.getMonth()],
+      category: deviation.category,
+    };
+  });
+
+  // Use a reducer to aggregate the count by month-year-category
+  const aggregatedData = transformedDeviations.reduce((acc, curr) => {
+    const key = `${curr.year}-${curr.month}-${curr.category}`;
+    if (!acc[key]) {
+      acc[key] = {
+        year: curr.year,
+        name: curr.monthName,
+        [curr.category]: 0,
+      };
+    }
+    acc[key][curr.category] += 1;
+    return acc;
+  }, {} as Record<string, any>);
+
+  // Convert the aggregated data object back into an array
+  return Object.values(aggregatedData);
+};
