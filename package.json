@@ -1,0 +1,6 @@
+{
+  "name": "intratask-main",
+  "version": "1.0.0",
+  "description": "Deviation tracking app",
+  "workspaces": ["web", "api"]
+}
