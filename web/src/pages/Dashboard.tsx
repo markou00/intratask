@@ -97,7 +97,7 @@ const Dashboard: React.FC = () => {
               Månedelig kategori oversikt
             </Title>
             <Box h={500}>
-              <StackedBarChart />
+              <StackedBarChart deviations={deviationsToDisplay} />
             </Box>
           </Paper>
         </SimpleGrid>
