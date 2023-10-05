@@ -4,7 +4,7 @@ import StatsCard from '../components/StatsCard/StatsCard';
 import { useQuery } from '@tanstack/react-query';
 import ActiveFilters from '../components/ActiveFilters';
 import SimpleAreaChart from '../components/charts/SimpleAreaChart';
-import SimplePieChart from '../components/charts/SimplePieChart';
+import SimplePieChart from '../components/charts/SimplePieChart/SimplePieChart';
 import StackedBarChart from '../components/charts/StackedBarChart';
 import Layout from '../components/layout/Layout';
 import { useFilters } from '../context/FilterContext';
@@ -27,11 +27,12 @@ const Dashboard: React.FC = () => {
 
   const deviations = deviationsQuery.data;
 
-  const getDeviationsByYear = deviations.filter(
+  // filters.at(0) because right now there is only year filter. But more will be added later
+  const filteredDeviations = deviations.filter(
     (deviation) => new Date(deviation.createdAt).getFullYear().toString() === filters?.at(0)
   );
 
-  const deviationsToDisplay = filters.length ? getDeviationsByYear : deviations;
+  const deviationsToDisplay = filters.length ? filteredDeviations : deviations;
 
   let createdCount = 0;
   let solvedCount = 0;
@@ -78,7 +79,7 @@ const Dashboard: React.FC = () => {
               Årlig kategori andel
             </Title>
             <Box h={400}>
-              <SimplePieChart />
+              <SimplePieChart deviations={deviationsToDisplay} />
             </Box>
           </Paper>
           <Paper radius="md" shadow="sm" withBorder>
