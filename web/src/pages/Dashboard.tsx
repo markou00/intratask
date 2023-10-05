@@ -1,4 +1,4 @@
-import { Box, Container, Paper, SimpleGrid, Text, Title } from '@mantine/core';
+import { Box, Container, LoadingOverlay, Paper, SimpleGrid, Title } from '@mantine/core';
 import StatsCard from '../components/StatsCard/StatsCard';
 
 import { useQuery } from '@tanstack/react-query';
@@ -9,6 +9,7 @@ import StackedBarChart from '../components/charts/StackedBarChart';
 import Layout from '../components/layout/Layout';
 import { useFilters } from '../context/FilterContext';
 import { getDeviations } from '../services/DeviationService';
+import { ServerError } from './ServerError';
 
 const Dashboard: React.FC = () => {
   const deviationsQuery = useQuery({
@@ -18,12 +19,8 @@ const Dashboard: React.FC = () => {
 
   const { filters } = useFilters();
 
-  if (deviationsQuery.isLoading) {
-    return <Text>Loading...</Text>;
-  }
-  if (deviationsQuery.isError) {
-    return <Text>Error...</Text>;
-  }
+  if (deviationsQuery.isLoading) return <LoadingOverlay visible={true} />;
+  if (deviationsQuery.isError) return <ServerError />;
 
   const deviations = deviationsQuery.data;
 
