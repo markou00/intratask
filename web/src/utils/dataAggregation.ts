@@ -123,3 +123,28 @@ export const aggregateDeviationsByMonthAndCategory = (deviations: Deviation[]) =
   // Convert the aggregated data object back into an array
   return Object.values(aggregatedData);
 };
+
+/**
+ * Extracts and returns all unique categories from the provided aggregated data.
+ *
+ * @param {Array<Object>} data - The aggregated data where each object represents a month's aggregate.
+ * @returns {string[]} An array of unique categories found in the data.
+ *
+ * @example
+ * const data = [
+ *   { name: 'Jan', year: 2022, HMS: 4000, Kvalitet: 2400 },
+ *   { name: 'Feb', year: 2021, Ytremiljø: 1290 }
+ * ];
+ * getUniqueCategories(data); // Returns ['HMS', 'Kvalitet', 'Ytremiljø']
+ */
+export const getUniqueCategories = (data: any[]): string[] => {
+  const categoriesSet: Set<string> = new Set();
+  data.forEach((item) => {
+    Object.keys(item).forEach((key) => {
+      if (key !== 'name' && key !== 'year') {
+        categoriesSet.add(key);
+      }
+    });
+  });
+  return Array.from(categoriesSet);
+};
