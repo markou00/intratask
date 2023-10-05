@@ -87,7 +87,7 @@ const Dashboard: React.FC = () => {
               Månedelig avvik oversikt
             </Title>
             <Box h={400}>
-              <SimpleAreaChart />
+              <SimpleAreaChart deviations={deviationsToDisplay} />
             </Box>
           </Paper>
         </SimpleGrid>

@@ -10,78 +10,22 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import { Deviation } from '../../../../api/shared/dbTypes';
 import { useFilters } from '../../context/FilterContext';
+import { aggregateDeviationsByMonth } from '../../utils/dataAggregation';
 
-const data = [
-  {
-    year: 2022,
-    name: 'Jan',
-    avvik: 4000,
-  },
-  {
-    year: 2022,
-    name: 'Feb',
-    avvik: 3000,
-  },
-  {
-    year: 2021,
-    name: 'Mar',
-    avvik: 0,
-  },
-  {
-    year: 2022,
-    name: 'Apr',
-    avvik: 2780,
-  },
-  {
-    year: 2021,
-    name: 'May',
-    avvik: 1890,
-  },
-  {
-    year: 2022,
-    name: 'Jun',
-    avvik: 0,
-  },
-  {
-    year: 2022,
-    name: 'Jul',
-    avvik: 2780,
-  },
-  {
-    year: 2021,
-    name: 'Aug',
-    avvik: 3490,
-  },
-  {
-    year: 2022,
-    name: 'Sep',
-    avvik: 3000,
-  },
-  {
-    year: 2022,
-    name: 'Oct',
-    avvik: 3490,
-  },
-  {
-    year: 2021,
-    name: 'Nov',
-    avvik: 1890,
-  },
-  {
-    year: 2022,
-    name: 'Dec',
-    avvik: 2390,
-  },
-];
+interface ISimpleAreaChart {
+  deviations: Deviation[];
+}
 
-const SimpleAreaChart = () => {
+const SimpleAreaChart: React.FC<ISimpleAreaChart> = ({ deviations }) => {
   const { filters } = useFilters();
 
-  // Basic function to filter data by year
+  const aggregatedData = aggregateDeviationsByMonth(deviations);
+
   const filteredData = filters.length
-    ? data.filter((d) => filters.includes(d.year.toString()))
-    : data;
+    ? aggregatedData.filter((d) => filters.includes(d.year.toString()))
+    : aggregatedData;
 
   return (
     <ResponsiveContainer width="100%" height="100%">
