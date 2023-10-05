@@ -10,10 +10,10 @@ import Layout from '../components/layout/Layout';
 import { useFilters } from '../context/FilterContext';
 import { getDeviations } from '../services/DeviationService';
 
-const Dashboard = () => {
+const Dashboard: React.FC = () => {
   const deviationsQuery = useQuery({
     queryKey: ['deviations'],
-    queryFn: () => getDeviations(),
+    queryFn: getDeviations,
   });
 
   const { filters } = useFilters();
@@ -21,39 +21,29 @@ const Dashboard = () => {
   if (deviationsQuery.isLoading) {
     return <Text>Loading...</Text>;
   }
-
   if (deviationsQuery.isError) {
     return <Text>Error...</Text>;
   }
 
   const deviations = deviationsQuery.data;
 
-  // Basic function to filter data by year
-  const filteredDeviations = filters.length
-    ? deviations.filter(
-        (deviation: any) =>
-          new Date(deviation?.createdAt).getFullYear().toString() === filters.at(0)
-      )
-    : deviations;
+  const getDeviationsByYear = deviations.filter(
+    (deviation) => new Date(deviation.createdAt).getFullYear().toString() === filters?.at(0)
+  );
 
-  // Check if filters are applied
-  const noFilterApplied = filteredDeviations.length === deviations.length;
+  const deviationsToDisplay = filters.length ? getDeviationsByYear : deviations;
 
-  // Calculate values based on whether a filter is applied
-  const createdValue = noFilterApplied ? deviations.length : filteredDeviations.length;
-
-  const solvedValue = noFilterApplied
-    ? deviations.filter((deviation: any) => deviation.isSolved).length
-    : filteredDeviations.filter((deviation: any) => deviation.isSolved).length;
-
-  const unsolvedValue = noFilterApplied
-    ? deviations.filter((deviation: any) => !deviation.isSolved).length
-    : filteredDeviations.filter((deviation: any) => !deviation.isSolved).length;
-
-  const zendeskValue = noFilterApplied
-    ? deviations.filter((deviation: any) => deviation.creator.toLowerCase() === 'zendesk').length
-    : filteredDeviations.filter((deviation: any) => deviation.creator.toLowerCase() === 'zendesk')
-        .length;
+  let createdCount = 0;
+  let solvedCount = 0;
+  let unsolvedCount = 0;
+  let zendeskCount = 0;
+  // Calculate stats cards values
+  deviationsToDisplay.forEach((deviation) => {
+    createdCount++;
+    if (deviation.isSolved) solvedCount++;
+    else unsolvedCount++;
+    if (deviation.creator.toLowerCase() === 'zendesk') zendeskCount++;
+  });
 
   return (
     <Layout>
@@ -69,10 +59,10 @@ const Dashboard = () => {
             { maxWidth: '36rem', cols: 1, spacing: 'sm' },
           ]}
         >
-          <StatsCard title="Opprettet avvik" variant="created" value={createdValue} />
-          <StatsCard title="Løste avvik" variant="solved" value={solvedValue} />
-          <StatsCard title="Uløste avvik" variant="unsolved" value={unsolvedValue} />
-          <StatsCard title="Avvik fra Zendesk" variant="zendesk" value={zendeskValue} />
+          <StatsCard title="Opprettet avvik" variant="created" value={createdCount} />
+          <StatsCard title="Løste avvik" variant="solved" value={solvedCount} />
+          <StatsCard title="Uløste avvik" variant="unsolved" value={unsolvedCount} />
+          <StatsCard title="Avvik fra Zendesk" variant="zendesk" value={zendeskCount} />
         </SimpleGrid>
         <SimpleGrid
           cols={2}
