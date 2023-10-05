@@ -10,7 +10,7 @@ interface ISimplePieChart {
   deviations: Deviation[];
 }
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
+const COLORS = ['#0088AA', '#00C49F', '#FFBB28', '#FF8042', '#a9a9a9'];
 
 const SimplePieChart: React.FC<ISimplePieChart> = ({ deviations }) => {
   const { filters } = useFilters();

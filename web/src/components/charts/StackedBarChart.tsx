@@ -11,6 +11,7 @@ import {
 interface IStackedBarChart {
   deviations: Deviation[];
 }
+const COLORS = ['#0088AA', '#00C49F', '#FFBB28', '#FF8042', '#a9a9a9'];
 
 const StackedBarChart: React.FC<IStackedBarChart> = ({ deviations }) => {
   const { filters } = useFilters();
@@ -42,8 +43,9 @@ const StackedBarChart: React.FC<IStackedBarChart> = ({ deviations }) => {
           <YAxis />
           <Tooltip />
           <Legend />
-          {uniqueCategories.map((category) => (
-            <Bar key={category} dataKey={category} stackId="a" fill="#e3e3e3" />
+
+          {uniqueCategories.map((category, index) => (
+            <Bar key={`cell-${index}`} dataKey={category} fill={COLORS[index % COLORS.length]} />
           ))}
         </BarChart>
       ) : (
