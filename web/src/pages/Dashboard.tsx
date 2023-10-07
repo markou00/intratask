@@ -6,7 +6,6 @@ import ActiveFilters from '../components/ActiveFilters';
 import SimpleAreaChart from '../components/charts/SimpleAreaChart';
 import SimplePieChart from '../components/charts/SimplePieChart/SimplePieChart';
 import StackedBarChart from '../components/charts/StackedBarChart';
-import Layout from '../components/layout/Layout';
 import { useFilters } from '../context/FilterContext';
 import { getDeviations } from '../services/DeviationService';
 import { ServerError } from './ServerError';
@@ -15,6 +14,8 @@ const Dashboard: React.FC = () => {
   const deviationsQuery = useQuery({
     queryKey: ['deviations'],
     queryFn: getDeviations,
+    staleTime: Infinity, // The data will never go stale once fetched
+    cacheTime: 5 * 60 * 1000, // The unused data will stay in cache for 5 minutes
   });
 
   const { filters } = useFilters();
@@ -44,7 +45,7 @@ const Dashboard: React.FC = () => {
   });
 
   return (
-    <Layout>
+    <>
       <ActiveFilters />
       <Container fluid p="md">
         <SimpleGrid
@@ -99,7 +100,7 @@ const Dashboard: React.FC = () => {
           </Paper>
         </SimpleGrid>
       </Container>
-    </Layout>
+    </>
   );
 };
 
