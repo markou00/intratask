@@ -18,8 +18,7 @@ import {
 } from '@mantine/core';
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
 import { IconLogout, IconPlus } from '@tabler/icons-react';
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 const HEADER_HEIGHT = rem(40);
 
@@ -103,8 +102,8 @@ const links = [
   },
 ];
 const Layout = () => {
+  const location = useLocation();
   const [opened, { toggle, close }] = useDisclosure(false);
-  const [active, setActive] = useState(links[0].link);
   const { classes, cx } = useStyles();
   const theme = useMantineTheme();
   const isMobile = useMediaQuery('(max-width: 48em)');
@@ -118,11 +117,8 @@ const Layout = () => {
     <Link
       key={link.label}
       to={link.link}
-      className={cx(classes.link, { [classes.linkActive]: active === link.link })}
-      onClick={() => {
-        setActive(link.link);
-        close();
-      }}
+      className={cx(classes.link, { [classes.linkActive]: location.pathname === link.link })}
+      onClick={close}
     >
       {link.label}
     </Link>
