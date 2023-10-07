@@ -18,7 +18,7 @@ import {
 } from '@mantine/core';
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
 import { IconLogout, IconPlus } from '@tabler/icons-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 const HEADER_HEIGHT = rem(40);
@@ -128,10 +128,6 @@ const Layout = () => {
     </Link>
   ));
 
-  useEffect(() => {
-    console.log('Component mounted');
-    console.log(active);
-  }, []);
   return (
     <Container p="md" fluid sx={{ boxShadow: theme.shadows.xs }}>
       <Header height={HEADER_HEIGHT} className={classes.root}>
