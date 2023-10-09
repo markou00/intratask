@@ -1,5 +1,6 @@
 import {
   Avatar,
+  Badge,
   Container,
   Group,
   MultiSelect,
@@ -41,7 +42,7 @@ const companies = [
     title: 'Ticket #33723 har flere lignende tickets',
     date: '2023-09-04',
     category: 'Ytremiljø',
-    creator: 'Rolf Waage', // should be an ID to a user which we can use to fetch name and picture
+    creator: 'system', // should be an ID to a user which we can use to fetch name and picture
     status: 'Påbegynt',
     assignee: 'Bjørn Inge Molvær', // should be an ID to a user which we can use to fetch name and picture
     progress: 25,
@@ -186,18 +187,21 @@ const Deviations: React.FC = () => {
             ellipsis: true,
 
             // TODO: using the id in the db, fetch the user's name and avatar
-            render: ({ creator }) => (
-              <Group spacing="sm">
-                <Avatar
-                  size={30}
-                  src="https://images.unsplash.com/photo-1624298357597-fd92dfbec01d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=250&q=80"
-                  radius={30}
-                />
-                <Text fz="sm" fw={500}>
-                  {creator}
-                </Text>
-              </Group>
-            ),
+            render: ({ creator }) =>
+              creator.toLowerCase() === 'system' ? (
+                <Badge variant="outline">System</Badge>
+              ) : (
+                <Group spacing="sm">
+                  <Avatar
+                    size={30}
+                    src="https://images.unsplash.com/photo-1624298357597-fd92dfbec01d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=250&q=80"
+                    radius={30}
+                  />
+                  <Text fz="sm" fw={500}>
+                    {creator}
+                  </Text>
+                </Group>
+              ),
 
             // render: () => (
             //   <Group spacing="sm">
