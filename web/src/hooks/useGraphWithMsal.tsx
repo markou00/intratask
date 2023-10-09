@@ -67,13 +67,22 @@ const useGraphWithMsal = (request: any, endpoint: any) => {
           .responseType(ResponseType.RAW)
           .get();
 
-        const responseHasClaimsChallenge = await handleClaimsChallenge(
-          graphResponse,
-          endpoint,
-          //@ts-ignore
-          account
-        );
-        return responseHasClaimsChallenge;
+        // Check if the endpoint is for a photo. If it is, we treat it differently.
+        if (endpoint.includes('/photo/$value')) {
+          if (graphResponse.status === 200) {
+            return graphResponse; // This will return the raw response which we can use to extract the blob.
+          } else {
+            throw new Error('Failed to fetch profile image.');
+          }
+        } else {
+          const responseHasClaimsChallenge = await handleClaimsChallenge(
+            graphResponse,
+            endpoint,
+            //@ts-ignore
+            account
+          );
+          return responseHasClaimsChallenge;
+        }
       } catch (error: any) {
         if (error.name === 'ClaimsChallengeAuthError') {
           login(InteractionType.Redirect, request);
