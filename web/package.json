@@ -21,6 +21,7 @@
     "@emotion/react": "^11.10.5",
     "@mantine/core": "6.0.20",
     "@mantine/hooks": "6.0.20",
+    "@microsoft/microsoft-graph-client": "^3.0.7",
     "@tabler/icons-react": "^2.34.0",
     "@tanstack/react-query": "^4.35.7",
     "axios": "^1.5.1",
