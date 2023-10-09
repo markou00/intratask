@@ -14,6 +14,7 @@ export const msalConfig: Configuration = {
     redirectUri: '/', // Points to window.location.origin. You must register this URI on Azure Portal/App Registration.
     postLogoutRedirectUri: '/', // Indicates the page to navigate after logout.
     navigateToLoginRequestUrl: false, // If "true", will navigate back to the original request location before processing the auth code response.
+    clientCapabilities: ['CP1'], // this lets the resource owner know that this client is capable of handling claims challenge.
   },
   cache: {
     cacheLocation: 'sessionStorage', // Configures cache location. "sessionStorage" is more secure, but "localStorage" gives you SSO between tabs.
@@ -53,7 +54,7 @@ export const msalConfig: Configuration = {
  * https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-permissions-and-consent#openid-connect-scopes
  */
 export const loginRequest = {
-  scopes: [],
+  scopes: ['User.Read', 'User.Read.All'],
 };
 
 /**
@@ -63,4 +64,15 @@ export const loginRequest = {
 export const silentRequest = {
   scopes: ['openid', 'profile'],
   loginHint: 'example@domain.net',
+};
+
+/**
+ * Add here the endpoints and scopes when obtaining an access token for protected web APIs. For more information, see:
+ * https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-browser/docs/resources-and-scopes.md
+ */
+export const protectedResources = {
+  graphUsers: {
+    endpoint: 'https://graph.microsoft.com/v1.0/users',
+    scopes: ['User.Read.All'],
+  },
 };
