@@ -4,147 +4,99 @@ import {
   Badge,
   Container,
   Group,
+  LoadingOverlay,
   MultiSelect,
   Progress,
   Text,
   TextInput,
-  createStyles,
-  rem,
+  useMantineTheme,
 } from '@mantine/core';
 import { useDebouncedValue } from '@mantine/hooks';
 import { IconInfoCircle, IconSearch } from '@tabler/icons-react';
+import { useQuery } from '@tanstack/react-query';
 import sortBy from 'lodash/sortBy';
 import { DataTable, DataTableSortStatus } from 'mantine-datatable';
 import { useEffect, useMemo, useState } from 'react';
+import { Deviation } from '../../../api/shared/dbTypes';
 import { protectedResources } from '../authConfig';
 import useGraphWithMsal from '../hooks/useGraphWithMsal';
-
-const useStyles = createStyles((theme) => ({
-  progressBar: {
-    '&:not(:first-of-type)': {
-      borderLeft: `${rem(3)} solid ${
-        theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white
-      }`,
-    },
-  },
-}));
-
-const deviations = [
-  {
-    id: '1',
-    title: 'Ticket #32734 har flere lignende tickets',
-    date: '2023-08-04',
-    category: 'Kvalitet',
-    creator: '56c6e677-66d2-407d-8704-8e285fbfeacf', // should be an ID to a user which we can use to fetch name and picture
-    status: 'Ny',
-    assignee: 'dcbb859d-79a0-423a-a6cc-3b50581207d2', // should be an ID to a user which we can use to fetch name and picture
-    progress: 0,
-  },
-  {
-    id: '2',
-    title: 'Ticket #33723 har flere lignende tickets',
-    date: '2023-09-04',
-    category: 'Ytremiljø',
-    creator: 'system', // should be an ID to a user which we can use to fetch name and picture
-    status: 'Påbegynt',
-    assignee: '', // should be an ID to a user which we can use to fetch name and picture
-    progress: 25,
-  },
-  {
-    id: '3',
-    title: 'Ticket #35847 har flere lignende tickets',
-    date: '2023-10-04',
-    category: 'Interne rutiner',
-    creator: 'dcbb859d-79a0-423a-a6cc-3b50581207d2', // should be an ID to a user which we can use to fetch name and picture
-    status: 'Ferdig',
-    assignee: '81e681ba-ad35-4e05-acd9-b5257aef96e5', // should be an ID to a user which we can use to fetch name and picture
-    progress: 100,
-  },
-];
+import { getDeviations } from '../services/DeviationService';
+import { ServerError } from './ServerError';
 
 const Deviations: React.FC = () => {
-  const { classes, theme } = useStyles();
+  const theme = useMantineTheme();
 
-  const [records, setRecords] = useState(sortBy(deviations, 'date'));
+  // State hooks
+  const [records, setRecords] = useState<Deviation[]>([]);
   const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({
     columnAccessor: 'date',
     direction: 'asc',
   });
-
-  const [query, setQuery] = useState('');
-  const [debouncedQuery] = useDebouncedValue(query, 200);
-
-  const [queryID, setQueryID] = useState('');
-  const [debouncedQueryID] = useDebouncedValue(queryID, 200);
-
+  const [titleQuery, setTitleQuery] = useState('');
+  const [debouncedTitleQuery] = useDebouncedValue(titleQuery, 200);
+  const [idQuery, setIdQuery] = useState('');
+  const [debouncedIdQuery] = useDebouncedValue(idQuery, 200);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const categories = useMemo(() => {
-    const categories = new Set(deviations.map((e) => e.category));
-    return [...categories];
-  }, []);
-
   const [selectedStatus, setSelectedStatus] = useState<string[]>([]);
-  const statuses = useMemo(() => {
-    const statuses = new Set(deviations.map((e) => e.status));
-    return [...statuses];
-  }, []);
+  const [graphData, setGraphData] = useState<any>(null); // TODO: Define proper type for graphData
 
-  //TODO:FIX TYPE ISSUES & AVOID THE USE OF 'any'
-  const [graphData, setGraphData] = useState(null);
+  // Queries
+  const deviationsQuery = useQuery({
+    queryKey: ['deviations'],
+    queryFn: getDeviations,
+    staleTime: Infinity,
+    cacheTime: 5 * 60 * 1000,
+  });
+  const deviations = deviationsQuery.data;
 
   const { error, execute, result } = useGraphWithMsal(
-    {
-      scopes: protectedResources.graphUsers.scopes,
-    },
+    { scopes: protectedResources.graphUsers.scopes },
     protectedResources.graphUsers.endpoint
   );
 
+  // Effects
   useEffect(() => {
-    if (!!graphData) {
-      return;
+    if (deviations) {
+      setRecords(sortBy(deviations, 'date'));
     }
+  }, [deviations]);
 
+  useEffect(() => {
     if (!graphData) {
-      execute(protectedResources.graphUsers.endpoint).then((data) => {
-        setGraphData(data);
-      });
+      execute(protectedResources.graphUsers.endpoint).then((data) => setGraphData(data));
     }
   }, [graphData, execute, result]);
 
   useEffect(() => {
-    const data = sortBy(deviations, sortStatus.columnAccessor) as [];
-    setRecords(sortStatus.direction === 'desc' ? data.reverse() : data);
-  }, [sortStatus]);
+    if (!deviations) return;
+
+    const sortedData = sortBy(deviations, sortStatus.columnAccessor);
+    const orderedData = sortStatus.direction === 'desc' ? sortedData.reverse() : sortedData;
+    setRecords(orderedData);
+  }, [sortStatus, deviations]);
 
   useEffect(() => {
-    setRecords(
-      deviations.filter(({ id, title, category, status }) => {
-        if (
-          debouncedQuery !== '' &&
-          !`${title}`.toLowerCase().includes(debouncedQuery.trim().toLowerCase())
-        ) {
-          return false;
-        }
+    if (!deviations) return;
 
-        if (
-          debouncedQueryID !== '' &&
-          !`${id}`.toLowerCase().includes(debouncedQueryID.trim().toLowerCase())
-        ) {
-          return false;
-        }
+    const filteredRecords = deviations.filter(({ id, title, category, status }) => {
+      return (
+        (!debouncedTitleQuery ||
+          title.toLowerCase().includes(debouncedTitleQuery.trim().toLowerCase())) &&
+        (!debouncedIdQuery ||
+          `${id}`.toLowerCase().includes(debouncedIdQuery.trim().toLowerCase())) &&
+        (!selectedCategories.length || selectedCategories.includes(category)) &&
+        (!selectedStatus.length || selectedStatus.includes(status))
+      );
+    });
+    setRecords(filteredRecords);
+  }, [deviations, debouncedIdQuery, debouncedTitleQuery, selectedCategories, selectedStatus]);
 
-        if (selectedCategories.length && !selectedCategories.some((c) => c === category)) {
-          return false;
-        }
+  const categories = useMemo(() => [...new Set(deviations?.map((e) => e.category))], [deviations]);
+  const statuses = useMemo(() => [...new Set(deviations?.map((e) => e.status))], [deviations]);
 
-        if (selectedStatus.length && !selectedStatus.some((s) => s === status)) {
-          return false;
-        }
-
-        return true;
-      })
-    );
-  }, [debouncedQueryID, debouncedQuery, selectedCategories, selectedStatus]);
+  // Render loading or error states
+  if (deviationsQuery.isLoading) return <LoadingOverlay visible={true} />;
+  if (deviationsQuery.isError) return <ServerError />;
 
   return (
     <Container fluid p="md">
@@ -160,11 +112,11 @@ const Deviations: React.FC = () => {
                 description="#12345"
                 placeholder="Search id..."
                 icon={<IconSearch size={16} />}
-                value={queryID}
-                onChange={(e: any) => setQueryID(e.currentTarget.value)}
+                value={idQuery}
+                onChange={(e: any) => setIdQuery(e.currentTarget.value)}
               />
             ),
-            filtering: queryID !== '',
+            filtering: idQuery !== '',
           },
           {
             accessor: 'title',
@@ -176,14 +128,15 @@ const Deviations: React.FC = () => {
                 description="A bug in the system"
                 placeholder="Search title..."
                 icon={<IconSearch size={16} />}
-                value={query}
-                onChange={(e: any) => setQuery(e.currentTarget.value)}
+                value={titleQuery}
+                onChange={(e: any) => setTitleQuery(e.currentTarget.value)}
               />
             ),
-            filtering: query !== '',
+            filtering: titleQuery !== '',
           },
           {
-            accessor: 'date',
+            accessor: 'createdAt',
+            render: ({ createdAt }) => new Date(createdAt).toLocaleDateString('NO'),
             ellipsis: true,
 
             sortable: true,
@@ -212,17 +165,18 @@ const Deviations: React.FC = () => {
             ellipsis: true,
 
             render: ({ creator }) =>
-              creator !== 'system' && error ? (
+              creator.toLowerCase() !== 'zendesk' && error ? (
                 <Alert variant="filled" color="red" icon={<IconInfoCircle size="1rem" />}>
                   Error
                 </Alert>
-              ) : creator.toLowerCase() === 'system' ? (
-                <Badge variant="outline">System</Badge>
+              ) : creator.toLowerCase() === 'zendesk' ? (
+                <Badge variant="outline">Zendesk</Badge>
               ) : (
                 <Group spacing="sm">
                   {creator.trim() !== '' && <Avatar size={30} radius={30} />}
                   <Text fz="sm" fw={500}>
-                    {graphData && graphData.value.find((user) => user.id === creator).displayName}
+                    {graphData &&
+                      graphData.value.find((user: any) => user.id === creator).displayName}
                   </Text>
                 </Group>
               ),
@@ -250,18 +204,17 @@ const Deviations: React.FC = () => {
             accessor: 'assignee',
             ellipsis: true,
 
-            render: ({ assignee }) =>
+            render: ({ assigneeId }) =>
               error ? (
                 <Alert variant="filled" color="red" icon={<IconInfoCircle size="1rem" />}>
                   Error
                 </Alert>
-              ) : assignee.toLowerCase() === 'system' ? (
-                <Badge variant="outline">System</Badge>
               ) : (
                 <Group spacing="sm">
-                  {assignee.trim() !== '' && <Avatar size={30} radius={30} />}
+                  {assigneeId?.trim() !== '' && assigneeId && <Avatar size={30} radius={30} />}
                   <Text fz="sm" fw={500}>
-                    {graphData && graphData.value.find((user) => user.id === assignee)?.displayName}
+                    {graphData &&
+                      graphData.value.find((user: any) => user.id === assigneeId)?.displayName}
                   </Text>
                 </Group>
               ),
@@ -276,7 +229,6 @@ const Deviations: React.FC = () => {
                   {progress}%
                 </Text>
                 <Progress
-                  classNames={{ bar: classes.progressBar }}
                   sections={[
                     {
                       value: progress,
@@ -300,7 +252,7 @@ const Deviations: React.FC = () => {
         withBorder
         withColumnBorders
         borderRadius="md"
-        minHeight={records.length === 0 ? '10rem' : ''}
+        minHeight={records?.length === 0 ? '10rem' : ''}
         sortStatus={sortStatus}
         onSortStatusChange={setSortStatus}
       />
