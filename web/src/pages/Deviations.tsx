@@ -39,6 +39,7 @@ const Deviations: React.FC = () => {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<string[]>([]);
   const [graphData, setGraphData] = useState<any>(null); // TODO: Define proper type for graphData
+  const [userImageUrls, setUserImageUrls] = useState<Record<string, string>>({});
 
   // Queries
   const deviationsQuery = useQuery({
@@ -53,6 +54,32 @@ const Deviations: React.FC = () => {
     { scopes: protectedResources.graphUsers.scopes },
     protectedResources.graphUsers.endpoint
   );
+
+  const { execute: executeImageUrl } = useGraphWithMsal(
+    {
+      scopes: ['User.Read.All'],
+    },
+    'https://graph.microsoft.com/v1.0/users/id/photo/$value'
+  );
+
+  const fetchImageUrlForId = async (id: string) => {
+    try {
+      const response = await executeImageUrl(
+        `https://graph.microsoft.com/v1.0/users/${id}/photo/$value`
+      );
+      if (response && response.ok) {
+        const imageBlob = await response.blob();
+        const imageObjectUrl = URL.createObjectURL(imageBlob);
+        setUserImageUrls((prev) => ({ ...prev, [id]: imageObjectUrl }));
+        return imageObjectUrl;
+      } else {
+        throw new Error(`Failed to fetch profile image for user ${id}.`);
+      }
+    } catch (error) {
+      console.error(`Error fetching image for user ${id}:`, error);
+      return '';
+    }
+  };
 
   // Effects
   useEffect(() => {
@@ -90,6 +117,19 @@ const Deviations: React.FC = () => {
     });
     setRecords(filteredRecords);
   }, [deviations, debouncedIdQuery, debouncedTitleQuery, selectedCategories, selectedStatus]);
+
+  useEffect(() => {
+    if (!graphData || !records) return;
+
+    records.forEach(({ creator, assigneeId }) => {
+      if (creator && creator.toLowerCase() !== 'zendesk' && !userImageUrls[creator]) {
+        fetchImageUrlForId(creator);
+      }
+      if (assigneeId && !userImageUrls[assigneeId]) {
+        fetchImageUrlForId(assigneeId);
+      }
+    });
+  }, [graphData, records, userImageUrls]);
 
   const categories = useMemo(() => [...new Set(deviations?.map((e) => e.category))], [deviations]);
   const statuses = useMemo(() => [...new Set(deviations?.map((e) => e.status))], [deviations]);
@@ -173,7 +213,9 @@ const Deviations: React.FC = () => {
                 <Badge variant="outline">Zendesk</Badge>
               ) : (
                 <Group spacing="sm">
-                  {creator.trim() !== '' && <Avatar size={30} radius={30} />}
+                  {creator.trim() !== '' && (
+                    <Avatar src={userImageUrls[creator]} size={30} radius={30} />
+                  )}
                   <Text fz="sm" fw={500}>
                     {graphData &&
                       graphData.value.find((user: any) => user.id === creator).displayName}
@@ -198,7 +240,7 @@ const Deviations: React.FC = () => {
                 searchable
               />
             ),
-            filtering: selectedCategories.length > 0,
+            filtering: selectedStatus.length > 0,
           },
           {
             accessor: 'assignee',
@@ -211,7 +253,9 @@ const Deviations: React.FC = () => {
                 </Alert>
               ) : (
                 <Group spacing="sm">
-                  {assigneeId?.trim() !== '' && assigneeId && <Avatar size={30} radius={30} />}
+                  {assigneeId?.trim() !== '' && assigneeId && (
+                    <Avatar src={userImageUrls[assigneeId]} size={30} radius={30} />
+                  )}
                   <Text fz="sm" fw={500}>
                     {graphData &&
                       graphData.value.find((user: any) => user.id === assigneeId)?.displayName}
