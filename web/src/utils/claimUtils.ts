@@ -1,5 +1,5 @@
 import { AccountInfo } from '@azure/msal-browser';
-import { msalConfig } from '../authConfig';
+import { msalConfig } from '../configs/authConfig';
 import { addClaimsToStorage } from './storageUtils';
 
 //TODO:FIX TYPE ISSUES & AVOID THE USE OF 'any'

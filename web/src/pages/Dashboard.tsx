@@ -6,7 +6,7 @@ import ActiveFilters from '../components/ActiveFilters';
 import SimpleAreaChart from '../components/charts/SimpleAreaChart';
 import SimplePieChart from '../components/charts/SimplePieChart/SimplePieChart';
 import StackedBarChart from '../components/charts/StackedBarChart';
-import { useFilters } from '../context/FilterContext';
+import { useFilters } from '../contexts/FilterContext';
 import { getDeviations } from '../services/DeviationService';
 import { ServerError } from './ServerError';
 

@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { ThemeProvider } from './ThemeProvider';
 import Layout from './components/layout/Layout';
-import { FilterProvider } from './context/FilterContext';
+import { FilterProvider } from './contexts/FilterContext';
 import Dashboard from './pages/Dashboard';
 import Deviations from './pages/Deviations';
 import Welcome from './pages/Welcome';

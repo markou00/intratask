@@ -1,5 +1,5 @@
 import { AccountInfo } from '@azure/msal-common';
-import { msalConfig } from '../authConfig';
+import { msalConfig } from '../configs/authConfig';
 
 /**
  *  This method stores the claim challenge to the localStorage in the browser to be used when acquiring a token

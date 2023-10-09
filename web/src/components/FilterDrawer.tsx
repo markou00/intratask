@@ -1,6 +1,6 @@
 import { Box, Button, Drawer, Flex, ScrollArea, Select } from '@mantine/core';
 import { useState } from 'react';
-import { useFilters } from '../context/FilterContext';
+import { useFilters } from '../contexts/FilterContext';
 
 interface IFilterDrawer {
   opened: boolean;

@@ -18,7 +18,7 @@ import sortBy from 'lodash/sortBy';
 import { DataTable, DataTableSortStatus } from 'mantine-datatable';
 import { useEffect, useMemo, useState } from 'react';
 import { Deviation } from '../../../api/shared/dbTypes';
-import { protectedResources } from '../authConfig';
+import { protectedResources } from '../configs/authConfig';
 import useGraphWithMsal from '../hooks/useGraphWithMsal';
 import { getDeviations } from '../services/DeviationService';
 import { ServerError } from './ServerError';

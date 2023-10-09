@@ -1,12 +1,12 @@
-import { useState, useCallback } from 'react';
-import { useMsalAuthentication, useMsal } from '@azure/msal-react';
 import { InteractionType } from '@azure/msal-browser';
+import { useMsal, useMsalAuthentication } from '@azure/msal-react';
 import { ResponseType } from '@microsoft/microsoft-graph-client';
+import { useCallback, useState } from 'react';
 
-import { msalConfig } from '../authConfig';
-import { getGraphClient } from '../graph';
-import { getClaimsFromStorage } from '../utils/storageUtils';
+import { msalConfig } from '../configs/authConfig';
+import { getGraphClient } from '../configs/graph';
 import { handleClaimsChallenge } from '../utils/claimUtils';
+import { getClaimsFromStorage } from '../utils/storageUtils';
 
 //TODO:FIX TYPE ISSUES & AVOID THE USE OF 'any'
 

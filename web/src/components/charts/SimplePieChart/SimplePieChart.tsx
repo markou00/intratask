@@ -2,7 +2,7 @@ import { Alert, Flex } from '@mantine/core';
 import { IconAlertCircle } from '@tabler/icons-react';
 import { Cell, Legend, Pie, PieChart, ResponsiveContainer } from 'recharts';
 import { Deviation } from '../../../../../api/shared/dbTypes';
-import { useFilters } from '../../../context/FilterContext';
+import { useFilters } from '../../../contexts/FilterContext';
 import { aggregateDataByCategory } from '../../../utils/dataAggregation';
 import CustomizedLabel from './CustomizedLabel';
 

@@ -1,6 +1,6 @@
 import { useMsal } from '@azure/msal-react';
 import { Box, Button, Container, Flex, Image, Text, Title, rem } from '@mantine/core';
-import { loginRequest } from '../authConfig';
+import { loginRequest } from '../configs/authConfig';
 
 const Welcome = () => {
   const { instance } = useMsal();

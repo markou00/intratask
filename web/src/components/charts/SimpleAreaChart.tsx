@@ -11,7 +11,7 @@ import {
   YAxis,
 } from 'recharts';
 import { Deviation } from '../../../../api/shared/dbTypes';
-import { useFilters } from '../../context/FilterContext';
+import { useFilters } from '../../contexts/FilterContext';
 import { aggregateDeviationsByMonth } from '../../utils/dataAggregation';
 
 interface ISimpleAreaChart {

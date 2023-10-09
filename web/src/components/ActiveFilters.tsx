@@ -1,7 +1,7 @@
 import { ActionIcon, Badge, Box, Button, ScrollArea, rem } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { IconAdjustmentsHorizontal, IconX } from '@tabler/icons-react';
-import { useFilters } from '../context/FilterContext';
+import { useFilters } from '../contexts/FilterContext';
 import FilterDrawer from './FilterDrawer';
 
 const ActiveFilters = () => {
