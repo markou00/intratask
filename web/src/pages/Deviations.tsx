@@ -1,4 +1,5 @@
 import {
+  Alert,
   Avatar,
   Badge,
   Container,
@@ -11,10 +12,12 @@ import {
   rem,
 } from '@mantine/core';
 import { useDebouncedValue } from '@mantine/hooks';
-import { IconSearch } from '@tabler/icons-react';
+import { IconInfoCircle, IconSearch } from '@tabler/icons-react';
 import sortBy from 'lodash/sortBy';
 import { DataTable, DataTableSortStatus } from 'mantine-datatable';
 import { useEffect, useMemo, useState } from 'react';
+import { protectedResources } from '../authConfig';
+import useGraphWithMsal from '../hooks/useGraphWithMsal';
 
 const useStyles = createStyles((theme) => ({
   progressBar: {
@@ -26,15 +29,15 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
-const companies = [
+const deviations = [
   {
     id: '1',
     title: 'Ticket #32734 har flere lignende tickets',
     date: '2023-08-04',
     category: 'Kvalitet',
-    creator: 'Rolf Waage', // should be an ID to a user which we can use to fetch name and picture
+    creator: '56c6e677-66d2-407d-8704-8e285fbfeacf', // should be an ID to a user which we can use to fetch name and picture
     status: 'Ny',
-    assignee: 'Bjørn Inge Molvær', // should be an ID to a user which we can use to fetch name and picture
+    assignee: 'dcbb859d-79a0-423a-a6cc-3b50581207d2', // should be an ID to a user which we can use to fetch name and picture
     progress: 0,
   },
   {
@@ -44,7 +47,7 @@ const companies = [
     category: 'Ytremiljø',
     creator: 'system', // should be an ID to a user which we can use to fetch name and picture
     status: 'Påbegynt',
-    assignee: 'Bjørn Inge Molvær', // should be an ID to a user which we can use to fetch name and picture
+    assignee: '', // should be an ID to a user which we can use to fetch name and picture
     progress: 25,
   },
   {
@@ -52,9 +55,9 @@ const companies = [
     title: 'Ticket #35847 har flere lignende tickets',
     date: '2023-10-04',
     category: 'Interne rutiner',
-    creator: 'Rolf Waage', // should be an ID to a user which we can use to fetch name and picture
+    creator: 'dcbb859d-79a0-423a-a6cc-3b50581207d2', // should be an ID to a user which we can use to fetch name and picture
     status: 'Ferdig',
-    assignee: 'Bjørn Inge Molvær', // should be an ID to a user which we can use to fetch name and picture
+    assignee: '81e681ba-ad35-4e05-acd9-b5257aef96e5', // should be an ID to a user which we can use to fetch name and picture
     progress: 100,
   },
 ];
@@ -62,7 +65,7 @@ const companies = [
 const Deviations: React.FC = () => {
   const { classes, theme } = useStyles();
 
-  const [records, setRecords] = useState(sortBy(companies, 'date'));
+  const [records, setRecords] = useState(sortBy(deviations, 'date'));
   const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({
     columnAccessor: 'date',
     direction: 'asc',
@@ -76,24 +79,46 @@ const Deviations: React.FC = () => {
 
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const categories = useMemo(() => {
-    const categories = new Set(companies.map((e) => e.category));
+    const categories = new Set(deviations.map((e) => e.category));
     return [...categories];
   }, []);
 
   const [selectedStatus, setSelectedStatus] = useState<string[]>([]);
   const statuses = useMemo(() => {
-    const statuses = new Set(companies.map((e) => e.status));
+    const statuses = new Set(deviations.map((e) => e.status));
     return [...statuses];
   }, []);
 
+  //TODO:FIX TYPE ISSUES & AVOID THE USE OF 'any'
+  const [graphData, setGraphData] = useState(null);
+
+  const { error, execute, result } = useGraphWithMsal(
+    {
+      scopes: protectedResources.graphUsers.scopes,
+    },
+    protectedResources.graphUsers.endpoint
+  );
+
   useEffect(() => {
-    const data = sortBy(companies, sortStatus.columnAccessor) as [];
+    if (!!graphData) {
+      return;
+    }
+
+    if (!graphData) {
+      execute(protectedResources.graphUsers.endpoint).then((data) => {
+        setGraphData(data);
+      });
+    }
+  }, [graphData, execute, result]);
+
+  useEffect(() => {
+    const data = sortBy(deviations, sortStatus.columnAccessor) as [];
     setRecords(sortStatus.direction === 'desc' ? data.reverse() : data);
   }, [sortStatus]);
 
   useEffect(() => {
     setRecords(
-      companies.filter(({ id, title, category, status }) => {
+      deviations.filter(({ id, title, category, status }) => {
         if (
           debouncedQuery !== '' &&
           !`${title}`.toLowerCase().includes(debouncedQuery.trim().toLowerCase())
@@ -186,32 +211,21 @@ const Deviations: React.FC = () => {
             accessor: 'creator',
             ellipsis: true,
 
-            // TODO: using the id in the db, fetch the user's name and avatar
             render: ({ creator }) =>
-              creator.toLowerCase() === 'system' ? (
+              creator !== 'system' && error ? (
+                <Alert variant="filled" color="red" icon={<IconInfoCircle size="1rem" />}>
+                  Error
+                </Alert>
+              ) : creator.toLowerCase() === 'system' ? (
                 <Badge variant="outline">System</Badge>
               ) : (
                 <Group spacing="sm">
-                  <Avatar
-                    size={30}
-                    src="https://images.unsplash.com/photo-1624298357597-fd92dfbec01d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=250&q=80"
-                    radius={30}
-                  />
+                  {creator.trim() !== '' && <Avatar size={30} radius={30} />}
                   <Text fz="sm" fw={500}>
-                    {creator}
+                    {graphData && graphData.value.find((user) => user.id === creator).displayName}
                   </Text>
                 </Group>
               ),
-
-            // render: () => (
-            //   <Group spacing="sm">
-            //     <Avatar size={30} radius={30} />
-            //     <Avatar size={30} src={graph.avatar} radius={30} />
-            //     <Text fz="sm" fw={500}>
-            //       {graph.name}
-            //     </Text>
-            //   </Group>
-            // ),
           },
           {
             accessor: 'status',
@@ -236,18 +250,21 @@ const Deviations: React.FC = () => {
             accessor: 'assignee',
             ellipsis: true,
 
-            render: ({ assignee }) => (
-              <Group spacing="sm">
-                <Avatar
-                  size={30}
-                  src="https://images.unsplash.com/photo-1586297135537-94bc9ba060aa?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=250&q=80"
-                  radius={30}
-                />
-                <Text fz="sm" fw={500}>
-                  {assignee}
-                </Text>
-              </Group>
-            ),
+            render: ({ assignee }) =>
+              error ? (
+                <Alert variant="filled" color="red" icon={<IconInfoCircle size="1rem" />}>
+                  Error
+                </Alert>
+              ) : assignee.toLowerCase() === 'system' ? (
+                <Badge variant="outline">System</Badge>
+              ) : (
+                <Group spacing="sm">
+                  {assignee.trim() !== '' && <Avatar size={30} radius={30} />}
+                  <Text fz="sm" fw={500}>
+                    {graphData && graphData.value.find((user) => user.id === assignee)?.displayName}
+                  </Text>
+                </Group>
+              ),
           },
           {
             accessor: 'progress',
