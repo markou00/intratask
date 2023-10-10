@@ -15,18 +15,19 @@ import {
 import { useDebouncedValue } from '@mantine/hooks';
 import { closeAllModals, openModal } from '@mantine/modals';
 import { IconEdit, IconInfoCircle, IconSearch } from '@tabler/icons-react';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import sortBy from 'lodash/sortBy';
 import { DataTable, DataTableSortStatus } from 'mantine-datatable';
 import { useEffect, useMemo, useState } from 'react';
 import { Deviation } from '../../../api/shared/dbTypes';
 import { protectedResources } from '../configs/authConfig';
 import useGraphWithMsal from '../hooks/useGraphWithMsal';
-import { getDeviations } from '../services/DeviationService';
+import { getDeviations, updateDeviation } from '../services/DeviationService';
 import { ServerError } from './ServerError';
 
 const Deviations: React.FC = () => {
   const theme = useMantineTheme();
+  const queryClient = useQueryClient();
 
   // State hooks
   const [records, setRecords] = useState<Deviation[]>([]);
@@ -42,6 +43,7 @@ const Deviations: React.FC = () => {
   const [selectedStatus, setSelectedStatus] = useState<string[]>([]);
   const [graphData, setGraphData] = useState<any>(null); // TODO: Define proper type for graphData
   const [userImageUrls, setUserImageUrls] = useState<Record<string, string>>({});
+  const [newCreator, setNewCreator] = useState('');
 
   // Queries
   const deviationsQuery = useQuery({
@@ -51,6 +53,17 @@ const Deviations: React.FC = () => {
     cacheTime: 5 * 60 * 1000,
   });
   const deviations = deviationsQuery.data;
+
+  const updateDeviationMutation = useMutation(
+    (args: { deviationId: number; devationData: Partial<Deviation> }) =>
+      updateDeviation(args.deviationId, args.devationData),
+    {
+      onSuccess: () => queryClient.invalidateQueries(['deviations']),
+    }
+  );
+
+  const handleUpdate = (deviationId: number, devationData: Partial<Deviation>) =>
+    updateDeviationMutation.mutate({ deviationId, devationData });
 
   const { error, execute, result } = useGraphWithMsal(
     { scopes: protectedResources.graphUsers.scopes },
@@ -312,7 +325,7 @@ const Deviations: React.FC = () => {
               icon: <IconInfoCircle size={16} />,
               onClick: () =>
                 openModal({
-                  title: 'test',
+                  title: `Avvik #${record.id}`,
                   children: (
                     <>
                       <Text>{record.creator}</Text>
@@ -332,13 +345,20 @@ const Deviations: React.FC = () => {
               icon: <IconEdit size={16} />,
               onClick: () =>
                 openModal({
-                  title: 'test',
+                  title: `Rediger Avvik #${record.id}`,
                   children: (
                     <>
-                      <Text>{record.creator}</Text>
+                      <TextInput
+                        label="Creator"
+                        placeholder="Type creator's id here..."
+                        onChange={(event) => setNewCreator(event.target.value)}
+                      />
                       <Button
                         sx={{ width: '100%', maxWidth: 100 }}
-                        onClick={() => closeAllModals()}
+                        onClick={() => {
+                          handleUpdate(record.id, { creator: newCreator });
+                          closeAllModals();
+                        }}
                       >
                         OK
                       </Button>
