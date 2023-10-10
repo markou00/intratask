@@ -165,6 +165,7 @@ const Deviations: React.FC = () => {
         minHeight={records?.length === 0 ? '10rem' : ''}
         sortStatus={sortStatus}
         onSortStatusChange={setSortStatus}
+        fetching={updateDeviationMutation.isLoading}
         columns={[
           {
             accessor: 'id',
