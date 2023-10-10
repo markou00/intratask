@@ -12,7 +12,7 @@ import {
   useMantineTheme,
 } from '@mantine/core';
 import { useDebouncedValue } from '@mantine/hooks';
-import { IconInfoCircle, IconSearch } from '@tabler/icons-react';
+import { IconEdit, IconInfoCircle, IconSearch } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import sortBy from 'lodash/sortBy';
 import { DataTable, DataTableSortStatus } from 'mantine-datatable';
@@ -141,6 +141,15 @@ const Deviations: React.FC = () => {
   return (
     <Container fluid p="md">
       <DataTable
+        records={records}
+        shadow="xs"
+        highlightOnHover
+        withBorder
+        withColumnBorders
+        borderRadius="md"
+        minHeight={records?.length === 0 ? '10rem' : ''}
+        sortStatus={sortStatus}
+        onSortStatusChange={setSortStatus}
         columns={[
           {
             accessor: 'id',
@@ -290,15 +299,25 @@ const Deviations: React.FC = () => {
             ),
           },
         ]}
-        records={records}
-        shadow="xs"
-        highlightOnHover
-        withBorder
-        withColumnBorders
-        borderRadius="md"
-        minHeight={records?.length === 0 ? '10rem' : ''}
-        sortStatus={sortStatus}
-        onSortStatusChange={setSortStatus}
+        rowContextMenu={{
+          trigger: 'click',
+          borderRadius: 'md',
+          shadow: 'lg',
+          items: (record) => [
+            {
+              key: 'details',
+              title: `Vis detaljer`,
+              icon: <IconInfoCircle size={16} />,
+              onClick: () => console.log(record),
+            },
+            {
+              key: 'edit',
+              title: 'Rediger',
+              icon: <IconEdit size={16} />,
+              onClick: () => console.log(record),
+            },
+          ],
+        }}
       />
     </Container>
   );
