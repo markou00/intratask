@@ -2,6 +2,7 @@ import {
   Alert,
   Avatar,
   Badge,
+  Box,
   Button,
   Container,
   Group,
@@ -10,6 +11,7 @@ import {
   Progress,
   Text,
   TextInput,
+  Title,
   useMantineTheme,
 } from '@mantine/core';
 import { useDebouncedValue } from '@mantine/hooks';
@@ -98,12 +100,6 @@ const Deviations: React.FC = () => {
 
   // Effects
   useEffect(() => {
-    if (deviations) {
-      setRecords(sortBy(deviations, 'date'));
-    }
-  }, [deviations]);
-
-  useEffect(() => {
     if (!graphData) {
       execute(protectedResources.graphUsers.endpoint).then((data) => setGraphData(data));
     }
@@ -112,15 +108,10 @@ const Deviations: React.FC = () => {
   useEffect(() => {
     if (!deviations) return;
 
-    const sortedData = sortBy(deviations, sortStatus.columnAccessor);
-    const orderedData = sortStatus.direction === 'desc' ? sortedData.reverse() : sortedData;
-    setRecords(orderedData);
-  }, [sortStatus, deviations]);
+    let processedData = deviations;
 
-  useEffect(() => {
-    if (!deviations) return;
-
-    const filteredRecords = deviations.filter(({ id, title, category, status }) => {
+    // Filter data
+    processedData = processedData.filter(({ id, title, category, status }) => {
       return (
         (!debouncedTitleQuery ||
           title.toLowerCase().includes(debouncedTitleQuery.trim().toLowerCase())) &&
@@ -130,8 +121,22 @@ const Deviations: React.FC = () => {
         (!selectedStatus.length || selectedStatus.includes(status))
       );
     });
-    setRecords(filteredRecords);
-  }, [deviations, debouncedIdQuery, debouncedTitleQuery, selectedCategories, selectedStatus]);
+
+    // Sort data
+    processedData = sortBy(processedData, sortStatus.columnAccessor);
+    if (sortStatus.direction === 'desc') {
+      processedData.reverse();
+    }
+
+    setRecords(processedData);
+  }, [
+    deviations,
+    debouncedIdQuery,
+    debouncedTitleQuery,
+    selectedCategories,
+    selectedStatus,
+    sortStatus,
+  ]);
 
   useEffect(() => {
     if (!graphData || !records) return;
@@ -327,16 +332,24 @@ const Deviations: React.FC = () => {
               onClick: () =>
                 openModal({
                   title: `Avvik #${record.id}`,
+                  size: 'lg',
                   children: (
-                    <>
-                      <Text>{record.creator}</Text>
+                    <Box>
+                      <Title order={2}>{record.title}</Title>
+                      <Text>
+                        Lagt til av{' '}
+                        {graphData &&
+                          graphData.value.find((user: any) => user.id === record.creator)
+                            .displayName}{' '}
+                        i {new Date(record.createdAt).toLocaleDateString('NO')}
+                      </Text>
                       <Button
                         sx={{ width: '100%', maxWidth: 100 }}
                         onClick={() => closeAllModals()}
                       >
                         OK
                       </Button>
-                    </>
+                    </Box>
                   ),
                 }),
             },
