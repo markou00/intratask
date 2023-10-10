@@ -2,6 +2,7 @@ import {
   Alert,
   Avatar,
   Badge,
+  Button,
   Container,
   Group,
   LoadingOverlay,
@@ -12,6 +13,7 @@ import {
   useMantineTheme,
 } from '@mantine/core';
 import { useDebouncedValue } from '@mantine/hooks';
+import { closeAllModals, openModal } from '@mantine/modals';
 import { IconEdit, IconInfoCircle, IconSearch } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import sortBy from 'lodash/sortBy';
@@ -289,7 +291,7 @@ const Deviations: React.FC = () => {
                         theme.colorScheme === 'dark' ? theme.colors.teal[9] : theme.colors.teal[6],
                     },
                     {
-                      value: `${100 - progress}`,
+                      value: +`${100 - progress}`,
                       color:
                         theme.colorScheme === 'dark' ? theme.colors.red[9] : theme.colors.red[6],
                     },
@@ -308,13 +310,41 @@ const Deviations: React.FC = () => {
               key: 'details',
               title: `Vis detaljer`,
               icon: <IconInfoCircle size={16} />,
-              onClick: () => console.log(record),
+              onClick: () =>
+                openModal({
+                  title: 'test',
+                  children: (
+                    <>
+                      <Text>{record.creator}</Text>
+                      <Button
+                        sx={{ width: '100%', maxWidth: 100 }}
+                        onClick={() => closeAllModals()}
+                      >
+                        OK
+                      </Button>
+                    </>
+                  ),
+                }),
             },
             {
               key: 'edit',
               title: 'Rediger',
               icon: <IconEdit size={16} />,
-              onClick: () => console.log(record),
+              onClick: () =>
+                openModal({
+                  title: 'test',
+                  children: (
+                    <>
+                      <Text>{record.creator}</Text>
+                      <Button
+                        sx={{ width: '100%', maxWidth: 100 }}
+                        onClick={() => closeAllModals()}
+                      >
+                        OK
+                      </Button>
+                    </>
+                  ),
+                }),
             },
           ],
         }}
