@@ -1,21 +1,11 @@
-import {
-  Accordion,
-  Badge,
-  Box,
-  Button,
-  Card,
-  Divider,
-  Flex,
-  Group,
-  Text,
-  Title,
-} from '@mantine/core';
+import { Box, Button, Divider, Flex, Group, Text, Title } from '@mantine/core';
 import { closeAllModals } from '@mantine/modals';
 import React from 'react';
 import { DeviationWithTickets } from '../../../api/shared/dbTypes';
 import ProgressBar from '../components/ProgressBar';
 import UserBadge from '../components/UserBadge';
 import { getDeviationDate } from '../utils/utils';
+import TicketsAccordion from './TicketsAccordion';
 
 interface IDeviationDetails {
   record: DeviationWithTickets;
@@ -99,42 +89,11 @@ const DeviationDetails: React.FC<IDeviationDetails> = ({
         <Text fw={700}>Beskrivelse:</Text>
         <Text>{record.description}</Text>
       </Box>
+
       <Divider />
-      <Accordion
-        variant="filled"
-        styles={{
-          control: {
-            paddingLeft: 0,
-          },
-        }}
-      >
-        <Accordion.Item value="tickets">
-          <Accordion.Control>
-            <Text fw={700}>Assosierte tickets</Text>
-          </Accordion.Control>
-          <Accordion.Panel>
-            <Flex direction="column" gap="md">
-              {record.tickets.map((ticket, index) => (
-                <Card key={index} shadow="sm" padding="lg" radius="md" withBorder>
-                  <Card.Section inheritPadding withBorder py="xs">
-                    <Text fw={500}>Ticket #{ticket.id}:</Text> {ticket.subject}
-                  </Card.Section>
-                  <Card.Section inheritPadding withBorder py="xs">
-                    {ticket.description}
-                  </Card.Section>
-                  <Card.Section inheritPadding withBorder py="xs">
-                    {ticket.tags.map((tag, index) => (
-                      <Badge key={index} mb="xs" mr="xs">
-                        {tag.name.replaceAll('_', ' ')}
-                      </Badge>
-                    ))}
-                  </Card.Section>
-                </Card>
-              ))}
-            </Flex>
-          </Accordion.Panel>
-        </Accordion.Item>
-      </Accordion>
+
+      <TicketsAccordion record={record} />
+
       <Divider />
 
       {record.solution && (
