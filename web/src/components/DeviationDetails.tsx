@@ -92,7 +92,7 @@ const DeviationDetails: React.FC<IDeviationDetails> = ({
 
       <Divider />
 
-      <TicketsAccordion record={record} />
+      <TicketsAccordion record={record} editMode={false} />
 
       <Divider />
 

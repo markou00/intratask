@@ -1,12 +1,25 @@
-import { Accordion, Badge, Card, Flex, Text } from '@mantine/core';
+import { Accordion, ActionIcon, Badge, Card, Flex, Text } from '@mantine/core';
+import { IconTrash } from '@tabler/icons-react';
 import React from 'react';
 import { DeviationWithTickets } from '../../../api/shared/dbTypes';
+import { useRedCards } from '../contexts/RedCardsContext';
 
 interface ITicketsAccordion {
   record: DeviationWithTickets;
+  editMode: boolean;
 }
 
-const TicketsAccordion: React.FC<ITicketsAccordion> = ({ record }) => {
+const TicketsAccordion: React.FC<ITicketsAccordion> = ({ record, editMode }) => {
+  const { redCardIds, setRedCardIds } = useRedCards();
+
+  const handleColorChange = (ticketId: number) => {
+    if (redCardIds.includes(ticketId)) {
+      setRedCardIds((prevIds) => prevIds.filter((id) => id !== ticketId));
+    } else {
+      setRedCardIds((prevIds) => [...prevIds, ticketId]);
+    }
+  };
+
   return (
     <Accordion
       variant="filled"
@@ -23,9 +36,29 @@ const TicketsAccordion: React.FC<ITicketsAccordion> = ({ record }) => {
         <Accordion.Panel>
           <Flex direction="column" gap="md">
             {record.tickets.map((ticket, index) => (
-              <Card key={index} shadow="sm" padding="lg" radius="md" withBorder>
+              <Card
+                key={index}
+                shadow="sm"
+                padding="lg"
+                radius="md"
+                withBorder
+                bg={(redCardIds.includes(ticket.id) && 'red') || ''}
+              >
                 <Card.Section inheritPadding withBorder py="xs">
-                  <Text fw={500}>Ticket #{ticket.id}:</Text> {ticket.subject}
+                  <Flex justify="space-between">
+                    <div>
+                      <Text fw={500}>Ticket #{ticket.id}:</Text> {ticket.subject}
+                    </div>
+                    {editMode && (
+                      <ActionIcon
+                        variant="filled"
+                        color="red"
+                        onClick={() => handleColorChange(ticket.id)}
+                      >
+                        <IconTrash />
+                      </ActionIcon>
+                    )}
+                  </Flex>
                 </Card.Section>
                 <Card.Section inheritPadding withBorder py="xs">
                   {ticket.description}
