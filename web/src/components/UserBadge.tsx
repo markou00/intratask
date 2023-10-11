@@ -29,10 +29,10 @@ const UserBadge: React.FC<UserBadgeProps> = ({
   }
 
   return (
-    <Group spacing="sm">
+    <Group spacing="xs">
       {identifier ? <Avatar src={userImageUrls[identifier]} size={30} radius={30} /> : ''}
 
-      <Text fz="sm" fw={500}>
+      <Text fz="sm">
         {graphData && graphData.value.find((user: any) => user.id === identifier)?.displayName}
       </Text>
     </Group>
