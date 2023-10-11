@@ -1,11 +1,12 @@
 import {
-  Alert,
-  Avatar,
+  Accordion,
   Badge,
   Box,
   Button,
+  Card,
   Container,
   Group,
+  Image,
   LoadingOverlay,
   MultiSelect,
   Progress,
@@ -16,12 +17,13 @@ import {
 } from '@mantine/core';
 import { useDebouncedValue } from '@mantine/hooks';
 import { closeAllModals, openModal } from '@mantine/modals';
-import { IconEdit, IconInfoCircle, IconSearch } from '@tabler/icons-react';
+import { IconEdit, IconInfoCircle, IconPlus, IconSearch } from '@tabler/icons-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import sortBy from 'lodash/sortBy';
 import { DataTable, DataTableSortStatus } from 'mantine-datatable';
 import { useEffect, useMemo, useState } from 'react';
 import { Deviation } from '../../../api/shared/dbTypes';
+import UserBadge from '../components/UserBadge';
 import { protectedResources } from '../configs/authConfig';
 import useGraphWithMsal from '../hooks/useGraphWithMsal';
 import { getDeviations, updateDeviation } from '../services/DeviationService';
@@ -234,24 +236,14 @@ const Deviations: React.FC = () => {
             accessor: 'creator',
             ellipsis: true,
 
-            render: ({ creator }) =>
-              creator.toLowerCase() !== 'zendesk' && error ? (
-                <Alert variant="filled" color="red" icon={<IconInfoCircle size="1rem" />}>
-                  Error
-                </Alert>
-              ) : creator.toLowerCase() === 'zendesk' ? (
-                <Badge variant="outline">Zendesk</Badge>
-              ) : (
-                <Group spacing="sm">
-                  {creator.trim() !== '' && (
-                    <Avatar src={userImageUrls[creator]} size={30} radius={30} />
-                  )}
-                  <Text fz="sm" fw={500}>
-                    {graphData &&
-                      graphData.value.find((user: any) => user.id === creator).displayName}
-                  </Text>
-                </Group>
-              ),
+            render: ({ creator }) => (
+              <UserBadge
+                identifier={creator}
+                error={error}
+                userImageUrls={userImageUrls}
+                graphData={graphData}
+              />
+            ),
           },
           {
             accessor: 'status',
@@ -276,22 +268,14 @@ const Deviations: React.FC = () => {
             accessor: 'assignee',
             ellipsis: true,
 
-            render: ({ assigneeId }) =>
-              error ? (
-                <Alert variant="filled" color="red" icon={<IconInfoCircle size="1rem" />}>
-                  Error
-                </Alert>
-              ) : (
-                <Group spacing="sm">
-                  {assigneeId?.trim() !== '' && assigneeId && (
-                    <Avatar src={userImageUrls[assigneeId]} size={30} radius={30} />
-                  )}
-                  <Text fz="sm" fw={500}>
-                    {graphData &&
-                      graphData.value.find((user: any) => user.id === assigneeId)?.displayName}
-                  </Text>
-                </Group>
-              ),
+            render: ({ assigneeId }) => (
+              <UserBadge
+                identifier={assigneeId}
+                error={error}
+                userImageUrls={userImageUrls}
+                graphData={graphData}
+              />
+            ),
           },
           {
             accessor: 'progress',
@@ -338,9 +322,12 @@ const Deviations: React.FC = () => {
                       <Title order={2}>{record.title}</Title>
                       <Text>
                         Lagt til av{' '}
-                        {graphData &&
-                          graphData.value.find((user: any) => user.id === record.creator)
-                            .displayName}{' '}
+                        <UserBadge
+                          identifier={record.creator}
+                          userImageUrls={userImageUrls}
+                          graphData={graphData}
+                          error={error}
+                        />
                         i {new Date(record.createdAt).toLocaleDateString('NO')}
                       </Text>
                       <Button
