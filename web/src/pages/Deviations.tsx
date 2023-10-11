@@ -22,19 +22,21 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import sortBy from 'lodash/sortBy';
 import { DataTable, DataTableSortStatus } from 'mantine-datatable';
 import { useEffect, useMemo, useState } from 'react';
-import { Deviation } from '../../../api/shared/dbTypes';
+import { Deviation, DeviationWithTickets } from '../../../api/shared/dbTypes';
 import UserBadge from '../components/UserBadge';
 import { protectedResources } from '../configs/authConfig';
 import useGraphWithMsal from '../hooks/useGraphWithMsal';
 import { getDeviations, updateDeviation } from '../services/DeviationService';
 import { ServerError } from './ServerError';
 
+const getDeviationDate = (date: Date) => new Date(date).toLocaleDateString('NO');
+
 const Deviations: React.FC = () => {
   const theme = useMantineTheme();
   const queryClient = useQueryClient();
 
   // State hooks
-  const [records, setRecords] = useState<Deviation[]>([]);
+  const [records, setRecords] = useState<DeviationWithTickets[]>([]);
   const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({
     columnAccessor: 'date',
     direction: 'asc',
@@ -59,14 +61,14 @@ const Deviations: React.FC = () => {
   const deviations = deviationsQuery.data;
 
   const updateDeviationMutation = useMutation(
-    (args: { deviationId: number; devationData: Partial<Deviation> }) =>
+    (args: { deviationId: number; devationData: Partial<DeviationWithTickets> }) =>
       updateDeviation(args.deviationId, args.devationData),
     {
       onSuccess: () => queryClient.invalidateQueries(['deviations']),
     }
   );
 
-  const handleUpdate = (deviationId: number, devationData: Partial<Deviation>) =>
+  const handleUpdate = (deviationId: number, devationData: Partial<DeviationWithTickets>) =>
     updateDeviationMutation.mutate({ deviationId, devationData });
 
   const { error, execute, result } = useGraphWithMsal(
@@ -208,7 +210,7 @@ const Deviations: React.FC = () => {
           },
           {
             accessor: 'createdAt',
-            render: ({ createdAt }) => new Date(createdAt).toLocaleDateString('NO'),
+            render: ({ createdAt }) => getDeviationDate(createdAt),
             ellipsis: true,
 
             sortable: true,
@@ -328,7 +330,7 @@ const Deviations: React.FC = () => {
                           graphData={graphData}
                           error={error}
                         />
-                        i {new Date(record.createdAt).toLocaleDateString('NO')}
+                        i {getDeviationDate(record.createdAt)}
                       </Text>
                       <Button
                         sx={{ width: '100%', maxWidth: 100 }}
