@@ -1,24 +1,24 @@
-import { Button, Container, LoadingOverlay, MultiSelect, TextInput } from '@mantine/core';
+import { Container, LoadingOverlay, MultiSelect, TextInput } from '@mantine/core';
 import { useDebouncedValue } from '@mantine/hooks';
-import { closeAllModals, openModal } from '@mantine/modals';
+import { openModal } from '@mantine/modals';
 import { IconEdit, IconInfoCircle, IconSearch } from '@tabler/icons-react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import sortBy from 'lodash/sortBy';
 import { DataTable, DataTableSortStatus } from 'mantine-datatable';
 import { useEffect, useMemo, useState } from 'react';
 import { DeviationWithTickets } from '../../../api/shared/dbTypes';
 import DeviationDetails from '../components/DeviationDetails';
+import MutateDeviation from '../components/MutateDeviation';
 import ProgressBar from '../components/ProgressBar';
 import UserBadge from '../components/UserBadge';
 import { protectedResources } from '../configs/authConfig';
+import { RedCardsProvider } from '../contexts/RedCardsContext';
 import useGraphWithMsal from '../hooks/useGraphWithMsal';
-import { getDeviations, updateDeviation } from '../services/DeviationService';
+import { getDeviations } from '../services/DeviationService';
 import { getDeviationDate } from '../utils/utils';
 import { ServerError } from './ServerError';
 
 const Deviations: React.FC = () => {
-  const queryClient = useQueryClient();
-
   // State hooks
   const [records, setRecords] = useState<DeviationWithTickets[]>([]);
   const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({
@@ -33,7 +33,6 @@ const Deviations: React.FC = () => {
   const [selectedStatus, setSelectedStatus] = useState<string[]>([]);
   const [graphData, setGraphData] = useState<any>(null); // TODO: Define proper type for graphData
   const [userImageUrls, setUserImageUrls] = useState<Record<string, string>>({});
-  const [newCreator, setNewCreator] = useState('');
 
   // Queries
   const deviationsQuery = useQuery({
@@ -43,17 +42,6 @@ const Deviations: React.FC = () => {
     cacheTime: 5 * 60 * 1000,
   });
   const deviations = deviationsQuery.data;
-
-  const updateDeviationMutation = useMutation(
-    (args: { deviationId: number; devationData: Partial<DeviationWithTickets> }) =>
-      updateDeviation(args.deviationId, args.devationData),
-    {
-      onSuccess: () => queryClient.invalidateQueries(['deviations']),
-    }
-  );
-
-  const handleUpdate = (deviationId: number, devationData: Partial<DeviationWithTickets>) =>
-    updateDeviationMutation.mutate({ deviationId, devationData });
 
   const { error, execute, result } = useGraphWithMsal(
     { scopes: protectedResources.graphUsers.scopes },
@@ -158,7 +146,7 @@ const Deviations: React.FC = () => {
         minHeight={records?.length === 0 ? '10rem' : ''}
         sortStatus={sortStatus}
         onSortStatusChange={setSortStatus}
-        fetching={updateDeviationMutation.isLoading}
+        fetching={deviationsQuery.isLoading}
         columns={[
           {
             accessor: 'id',
@@ -284,12 +272,14 @@ const Deviations: React.FC = () => {
                   title: `Avvik #${record.id}`,
                   size: 'xl',
                   children: (
-                    <DeviationDetails
-                      graphData={graphData}
-                      record={record}
-                      userImageUrls={userImageUrls}
-                      error={error}
-                    />
+                    <RedCardsProvider>
+                      <DeviationDetails
+                        graphData={graphData}
+                        record={record}
+                        userImageUrls={userImageUrls}
+                        error={error}
+                      />
+                    </RedCardsProvider>
                   ),
                 }),
             },
@@ -300,23 +290,11 @@ const Deviations: React.FC = () => {
               onClick: () =>
                 openModal({
                   title: `Rediger Avvik #${record.id}`,
+                  size: 'xl',
                   children: (
-                    <>
-                      <TextInput
-                        label="Creator"
-                        placeholder="Type creator's id here..."
-                        onChange={(event) => setNewCreator(event.target.value)}
-                      />
-                      <Button
-                        sx={{ width: '100%', maxWidth: 100 }}
-                        onClick={() => {
-                          handleUpdate(record.id, { creator: newCreator });
-                          closeAllModals();
-                        }}
-                      >
-                        OK
-                      </Button>
-                    </>
+                    <RedCardsProvider>
+                      <MutateDeviation graphData={graphData} record={record} />,
+                    </RedCardsProvider>
                   ),
                 }),
             },
