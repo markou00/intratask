@@ -10,6 +10,7 @@ import {
   Group,
   Header,
   Image,
+  Modal,
   Paper,
   Transition,
   createStyles,
@@ -18,7 +19,12 @@ import {
 } from '@mantine/core';
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
 import { IconLogout, IconPlus } from '@tabler/icons-react';
+import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { protectedResources } from '../../configs/authConfig';
+import { RedCardsProvider } from '../../contexts/RedCardsContext';
+import useGraphWithMsal from '../../hooks/useGraphWithMsal';
+import MutateDeviation from '../MutateDeviation';
 
 const HEADER_HEIGHT = rem(40);
 
@@ -102,6 +108,8 @@ const links = [
   },
 ];
 const Layout = () => {
+  const [modalOpened, { open: openModal, close: closeModal }] = useDisclosure(false);
+  const [graphData, setGraphData] = useState<any>(null); // TODO: Define proper type for graphData
   const location = useLocation();
   const [opened, { toggle, close }] = useDisclosure(false);
   const { classes, cx } = useStyles();
@@ -112,6 +120,17 @@ const Layout = () => {
   const handleLogoutRedirect = () => {
     instance.logoutRedirect();
   };
+
+  const { execute, result } = useGraphWithMsal(
+    { scopes: protectedResources.graphUsers.scopes },
+    protectedResources.graphUsers.endpoint
+  );
+
+  useEffect(() => {
+    if (!graphData) {
+      execute(protectedResources.graphUsers.endpoint).then((data) => setGraphData(data));
+    }
+  }, [graphData, execute, result]);
 
   const items = links.map((link) => (
     <Link
@@ -139,15 +158,22 @@ const Layout = () => {
 
           <Group>
             {!isMobile && (
-              <Button radius="md" leftIcon={<IconPlus size="1.2rem" />}>
+              <Button radius="md" leftIcon={<IconPlus size="1.2rem" />} onClick={openModal}>
                 Ny Avvik
               </Button>
             )}
             {isMobile && (
-              <ActionIcon radius="md" color="teams" variant="filled" size="lg">
+              <ActionIcon radius="md" color="teams" variant="filled" size="lg" onClick={openModal}>
                 <IconPlus size="1.2rem" />
               </ActionIcon>
             )}
+
+            <RedCardsProvider>
+              <Modal opened={modalOpened} onClose={closeModal} title="Opprett et nytt avvik">
+                <MutateDeviation graphData={graphData} mode="create" closeModal={closeModal} />
+              </Modal>
+            </RedCardsProvider>
+
             <Divider orientation="vertical" size="sm" />
             <ActionIcon variant="transparent" size="lg" onClick={handleLogoutRedirect}>
               <IconLogout />
