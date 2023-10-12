@@ -28,9 +28,35 @@ const UpdateDeviation: AzureFunction = async function (
       };
     }
 
+    // Get the current tickets associated with this deviation
+    const currentDeviation = await prisma.deviation.findUnique({
+      where: { id: Number(id) },
+      select: { tickets: true },
+    });
+
+    const currentTicketIds = currentDeviation.tickets.map(
+      (ticket) => ticket.id
+    );
+    const newTicketIds = updateData.tickets.map((ticket) => ticket.id);
+
+    const ticketsToConnect = newTicketIds.filter(
+      (ticketId) => !currentTicketIds.includes(ticketId)
+    );
+    const ticketsToDisconnect = currentTicketIds.filter(
+      (ticketId) => !newTicketIds.includes(ticketId)
+    );
+
     const updatedDeviation = await prisma.deviation.update({
       where: { id: Number(id) },
-      data: updateData,
+      data: {
+        ...updateData,
+        tickets: updateData.tickets
+          ? {
+              connect: ticketsToConnect.map((id) => ({ id })),
+              disconnect: ticketsToDisconnect.map((id) => ({ id })),
+            }
+          : undefined,
+      },
       include: {
         tickets: {
           include: {
