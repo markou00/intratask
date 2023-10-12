@@ -1,7 +1,6 @@
 import { Accordion, ActionIcon, Badge, Card, Flex, Text } from '@mantine/core';
 import { IconTrash } from '@tabler/icons-react';
 import React from 'react';
-import { DeviationWithTickets } from '../../../api/shared/dbTypes';
 import { useRedCards } from '../contexts/RedCardsContext';
 
 interface ITicketsAccordion {

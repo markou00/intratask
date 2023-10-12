@@ -1,7 +1,6 @@
 import { Box, Button, Divider, Flex, Group, Text, Title } from '@mantine/core';
 import { closeAllModals } from '@mantine/modals';
 import React from 'react';
-import { DeviationWithTickets } from '../../../api/shared/dbTypes';
 import ProgressBar from '../components/ProgressBar';
 import UserBadge from '../components/UserBadge';
 import { getDeviationDate } from '../utils/utils';

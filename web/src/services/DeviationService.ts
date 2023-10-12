@@ -1,4 +1,3 @@
-import { Deviation, DeviationWithTickets } from '../../../api/shared/dbTypes';
 import Api from '../configs/Api';
 
 export const getDeviations = async (): Promise<DeviationWithTickets[]> => {

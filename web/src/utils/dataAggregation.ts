@@ -1,5 +1,3 @@
-import { Deviation } from '../../../api/shared/dbTypes';
-
 /**
  * Aggregates an array of deviations by category and calculates the total number of deviations for each category.
  *
@@ -8,7 +6,7 @@ import { Deviation } from '../../../api/shared/dbTypes';
  */
 export const aggregateDataByCategory = (deviations: Deviation[]) =>
   deviations.reduce((acc, deviation) => {
-    const existingEntry = acc.find((item) => item.name === deviation.category);
+    const existingEntry = acc.find((item: any) => item.name === deviation.category);
     if (existingEntry) {
       existingEntry.value += 1;
     } else {

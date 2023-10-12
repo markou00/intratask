@@ -1,7 +1,6 @@
 import { Alert, Flex } from '@mantine/core';
 import { IconAlertCircle } from '@tabler/icons-react';
 import { Bar, BarChart, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import { Deviation } from '../../../../api/shared/dbTypes';
 import { useFilters } from '../../contexts/FilterContext';
 import {
   aggregateDeviationsByMonthAndCategory,

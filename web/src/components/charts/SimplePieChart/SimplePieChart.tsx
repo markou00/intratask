@@ -1,7 +1,6 @@
 import { Alert, Flex } from '@mantine/core';
 import { IconAlertCircle } from '@tabler/icons-react';
 import { Cell, Legend, Pie, PieChart, ResponsiveContainer } from 'recharts';
-import { Deviation } from '../../../../../api/shared/dbTypes';
 import { useFilters } from '../../../contexts/FilterContext';
 import { aggregateDataByCategory } from '../../../utils/dataAggregation';
 import CustomizedLabel from './CustomizedLabel';
@@ -37,7 +36,7 @@ const SimplePieChart: React.FC<ISimplePieChart> = ({ deviations }) => {
             fill="#8884d8"
             dataKey="value"
           >
-            {aggregatedData.map((_, index) => (
+            {aggregatedData.map((_: any, index: any) => (
               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
             ))}
           </Pie>

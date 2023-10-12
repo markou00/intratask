@@ -3,7 +3,6 @@ import { Button, Divider, Flex, Select, TextInput, Textarea, createStyles } from
 import { closeAllModals } from '@mantine/modals';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import React, { useEffect, useState } from 'react';
-import { DeviationWithTickets } from '../../../api/shared/dbTypes';
 import { useRedCards } from '../contexts/RedCardsContext';
 import { createDeviation, updateDeviation } from '../services/DeviationService';
 import TicketsAccordion from './TicketsAccordion';

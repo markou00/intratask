@@ -10,7 +10,6 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import { Deviation } from '../../../../api/shared/dbTypes';
 import { useFilters } from '../../contexts/FilterContext';
 import { aggregateDeviationsByMonth } from '../../utils/dataAggregation';
 

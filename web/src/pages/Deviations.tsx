@@ -6,7 +6,6 @@ import { useQuery } from '@tanstack/react-query';
 import sortBy from 'lodash/sortBy';
 import { DataTable, DataTableSortStatus } from 'mantine-datatable';
 import { useEffect, useMemo, useState } from 'react';
-import { DeviationWithTickets } from '../../../api/shared/dbTypes';
 import DeviationDetails from '../components/DeviationDetails';
 import MutateDeviation from '../components/MutateDeviation';
 import ProgressBar from '../components/ProgressBar';
