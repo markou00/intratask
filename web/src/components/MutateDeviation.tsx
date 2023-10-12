@@ -1,17 +1,20 @@
+import { useMsal } from '@azure/msal-react';
 import { Button, Divider, Flex, Select, TextInput, Textarea, createStyles } from '@mantine/core';
 import { closeAllModals } from '@mantine/modals';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import React, { useEffect, useState } from 'react';
 import { DeviationWithTickets } from '../../../api/shared/dbTypes';
 import { useRedCards } from '../contexts/RedCardsContext';
-import { updateDeviation } from '../services/DeviationService';
+import { createDeviation, updateDeviation } from '../services/DeviationService';
 import TicketsAccordion from './TicketsAccordion';
 
 interface IMutateDeviation {
-  record: DeviationWithTickets;
+  record?: DeviationWithTickets;
   graphData: {
     value: Array<{ id: string; displayName: string }>;
   };
+  mode: 'edit' | 'create';
+  closeModal?: () => void;
 }
 
 const useStyles = createStyles((theme) => ({
@@ -34,20 +37,34 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
-const MutateDeviation: React.FC<IMutateDeviation> = ({ record, graphData }) => {
+const MutateDeviation: React.FC<IMutateDeviation> = ({ record, graphData, mode, closeModal }) => {
   const { classes } = useStyles();
   const { redCardIds } = useRedCards();
+  const { instance } = useMsal();
+  const activeAccountId = instance.getActiveAccount()?.localAccountId;
 
-  const [title, setTitle] = useState(record.title.toLowerCase());
-  const [priority, setPriority] = useState<string | null>(record.priority.toLowerCase());
-  const [category, setCategory] = useState<string | null>(record.category.toLowerCase());
-  const [status, setStatus] = useState<string | null>(record.status.toLowerCase());
-  const [description, setDescription] = useState(record.description.toLowerCase());
-  const [solution, setSolution] = useState(record.solution && record.solution.toLowerCase());
+  const [title, setTitle] = useState(mode === 'edit' ? record?.title.toLowerCase() || '' : '');
+  const [priority, setPriority] = useState<string | null>(
+    mode === 'edit' ? record?.priority.toLowerCase() || null : ''
+  );
+  const [category, setCategory] = useState<string | null>(
+    mode === 'edit' ? record?.category.toLowerCase() || null : ''
+  );
+  const [status, setStatus] = useState<string | null>(
+    mode === 'edit' ? record?.status.toLowerCase() || null : ''
+  );
+  const [description, setDescription] = useState(
+    mode === 'edit' ? record?.description.toLowerCase() : ''
+  );
+  const [solution, setSolution] = useState(
+    mode === 'edit' ? record?.solution && record.solution.toLowerCase() : ''
+  );
   const [employees, setEmployees] = useState<Array<{ value: string; label: string }>>([]);
 
   const [assigneeName, setAssigneeName] = useState<string | null>(
-    graphData.value.find((user: any) => user.id === record.assigneeId)?.displayName || null
+    mode === 'edit'
+      ? graphData.value.find((user: any) => user.id === record?.assigneeId)?.displayName || null
+      : ''
   );
 
   useEffect(() => {
@@ -69,6 +86,16 @@ const MutateDeviation: React.FC<IMutateDeviation> = ({ record, graphData }) => {
 
   const handleUpdate = (deviationId: number, devationData: Partial<DeviationWithTickets>) =>
     updateDeviationMutation.mutate({ deviationId, devationData });
+
+  const createDeviationMutation = useMutation(
+    (args: { devationData: Partial<DeviationWithTickets> }) => createDeviation(args.devationData),
+    {
+      onSuccess: () => queryClient.invalidateQueries(['deviations']),
+    }
+  );
+
+  const handleCreate = (devationData: Partial<DeviationWithTickets>) =>
+    createDeviationMutation.mutate({ devationData });
 
   return (
     <Flex p="xs" direction="column" gap="md">
@@ -140,12 +167,14 @@ const MutateDeviation: React.FC<IMutateDeviation> = ({ record, graphData }) => {
         />
       </Flex>
 
-      <Divider />
+      {mode === 'edit' && record && record.tickets.length > 0 && (
+        <>
+          <Divider />
+          <TicketsAccordion record={record} editMode={true} />
 
-      <TicketsAccordion record={record} editMode={true} />
-
-      <Divider />
-
+          <Divider />
+        </>
+      )}
       {(solution || status === 'ferdig') && (
         <>
           <Textarea
@@ -158,39 +187,83 @@ const MutateDeviation: React.FC<IMutateDeviation> = ({ record, graphData }) => {
         </>
       )}
 
-      <Flex gap="sm" justify="end">
-        <Button sx={{ width: '100%', maxWidth: 100 }} onClick={() => closeAllModals()}>
-          Avbryt
-        </Button>
-        <Button
-          sx={{ width: '100%', maxWidth: 100 }}
-          disabled={updateDeviationMutation.isLoading}
-          onClick={() => {
-            handleUpdate(record.id, {
-              title,
-              priority: priority || undefined,
-              category: category || undefined,
-              status: status || undefined,
-              description,
-              solution,
-              progress:
-                status?.toLowerCase() === 'ferdig'
-                  ? 100
-                  : status?.toLowerCase() === 'pågår'
-                  ? 50
-                  : status?.toLowerCase() === 'ny'
-                  ? 0
-                  : record.progress,
-              tickets: record.tickets.filter((item) => !redCardIds.includes(item.id)),
-              assigneeId: graphData.value.find((employee) => employee.displayName === assigneeName)
-                ?.id,
-            });
-            closeAllModals();
-          }}
-        >
-          Bekreft
-        </Button>
-      </Flex>
+      {mode === 'edit' && record && (
+        <Flex gap="sm" justify="end">
+          <Button sx={{ width: '100%', maxWidth: 100 }} onClick={() => closeAllModals()}>
+            Avbryt
+          </Button>
+          <Button
+            sx={{ width: '100%', maxWidth: 100 }}
+            disabled={updateDeviationMutation.isLoading}
+            onClick={() => {
+              handleUpdate(record.id, {
+                title,
+                priority: priority || undefined,
+                category: category || undefined,
+                status: status || undefined,
+                description,
+                solution,
+                progress:
+                  status?.toLowerCase() === 'ferdig'
+                    ? 100
+                    : status?.toLowerCase() === 'pågår'
+                    ? 50
+                    : status?.toLowerCase() === 'ny'
+                    ? 0
+                    : record.progress,
+                tickets: record.tickets.filter((item) => !redCardIds.includes(item.id)),
+                assigneeId: graphData.value.find(
+                  (employee) => employee.displayName === assigneeName
+                )?.id,
+              });
+              closeAllModals();
+            }}
+          >
+            Bekreft
+          </Button>
+        </Flex>
+      )}
+
+      {mode === 'create' && closeModal && (
+        <Flex mt="sm" gap="sm" justify="end">
+          <Button
+            sx={{ width: '100%', maxWidth: 100 }}
+            onClick={() => {
+              closeModal();
+            }}
+          >
+            Avbryt
+          </Button>
+          <Button
+            sx={{ width: '100%', maxWidth: 100 }}
+            onClick={() => {
+              handleCreate({
+                title,
+                priority: priority || undefined,
+                category: category || undefined,
+                status: status || undefined,
+                description,
+                solution,
+                progress:
+                  status?.toLowerCase() === 'ferdig'
+                    ? 100
+                    : status?.toLowerCase() === 'pågår'
+                    ? 50
+                    : status?.toLowerCase() === 'ny'
+                    ? 0
+                    : 0,
+                creator: activeAccountId,
+                assigneeId: graphData.value.find(
+                  (employee) => employee.displayName === assigneeName
+                )?.id,
+              });
+              closeModal();
+            }}
+          >
+            Opprett
+          </Button>
+        </Flex>
+      )}
     </Flex>
   );
 };

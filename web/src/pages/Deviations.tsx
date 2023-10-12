@@ -293,7 +293,7 @@ const Deviations: React.FC = () => {
                   size: 'xl',
                   children: (
                     <RedCardsProvider>
-                      <MutateDeviation graphData={graphData} record={record} />,
+                      <MutateDeviation graphData={graphData} record={record} mode="edit" />,
                     </RedCardsProvider>
                   ),
                 }),
