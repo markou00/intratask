@@ -16,7 +16,7 @@
     "axios": "^1.5.1"
   },
   "devDependencies": {
-    "@azure/functions": "^3.0.0",
+    "@azure/functions": "3.0.0",
     "@types/node": "^16.x",
     "prisma": "5.3.1",
     "rimraf": "^5.0.0",
