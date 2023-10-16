@@ -11,9 +11,7 @@ interface IDeviationDetails {
   record: DeviationWithTickets;
   error?: boolean | null;
   userImageUrls: Record<string, string>;
-  graphData: {
-    value: Array<{ id: string; displayName: string }>;
-  };
+  graphData: any[];
 }
 
 const DeviationDetails: React.FC<IDeviationDetails> = ({
