@@ -2,6 +2,9 @@
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
-}
 
-module.exports = nextConfig
+  // Needed for Azure deployment
+  output: "standalone",
+};
+
+module.exports = nextConfig;
