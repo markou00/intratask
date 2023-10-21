@@ -206,6 +206,11 @@ const Deviations: React.FC = () => {
             filtering: titleQuery !== "",
           },
           {
+            accessor: "tickets",
+            ellipsis: true,
+            render: ({ tickets }) => tickets.length,
+          },
+          {
             accessor: "createdAt",
             render: ({ createdAt }) => getDeviationDate(createdAt),
             ellipsis: true,
