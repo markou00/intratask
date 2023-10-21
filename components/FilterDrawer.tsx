@@ -1,6 +1,8 @@
 import { Box, Button, Drawer, Flex, ScrollArea, Select } from "@mantine/core";
+import { useQuery } from "@tanstack/react-query";
 import { useFilters } from "contexts/FilterContext";
 import { useState } from "react";
+import { getDeviations } from "services/DeviationService";
 
 interface IFilterDrawer {
   opened: boolean;
@@ -8,9 +10,22 @@ interface IFilterDrawer {
 }
 
 const FilterDrawer = ({ opened, close }: IFilterDrawer) => {
+  const deviationsQuery = useQuery({
+    queryKey: ["deviations"],
+    queryFn: getDeviations,
+    staleTime: Infinity,
+    cacheTime: 5 * 60 * 1000,
+  });
   const { setFilters } = useFilters();
-  // TODO: Replace this with data from Zendesk
-  const data = ["2020", "2021", "2022", "2023"];
+  const deviations = deviationsQuery.data;
+  const data = Array.from(
+    new Set(
+      deviations?.map((deviation) =>
+        new Date(deviation.createdAt).getFullYear().toString()
+      )
+    )
+  );
+
   const [year, setYear] = useState(data[0]);
 
   return (
@@ -44,6 +59,7 @@ const FilterDrawer = ({ opened, close }: IFilterDrawer) => {
         <Drawer.Body mb={50}>
           <Select
             label="Dato"
+            placeholder="Velg ett år"
             data={data}
             value={year}
             onChange={(value) => setYear(value!)}
