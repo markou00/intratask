@@ -11,14 +11,12 @@ interface IDeviationDetails {
   record: DeviationWithTickets;
   error?: boolean | null;
   userImageUrls: Record<string, string>;
-  graphData: any[];
 }
 
 const DeviationDetails: React.FC<IDeviationDetails> = ({
   record,
   error,
   userImageUrls,
-  graphData,
 }) => {
   return (
     <Flex p="xs" direction="column" gap="md">
@@ -53,7 +51,6 @@ const DeviationDetails: React.FC<IDeviationDetails> = ({
             <UserBadge
               identifier={record.creator}
               userImageUrls={userImageUrls}
-              graphData={graphData}
               error={error}
             />
           </Flex>
@@ -63,7 +60,6 @@ const DeviationDetails: React.FC<IDeviationDetails> = ({
             <UserBadge
               identifier={record.assigneeId}
               userImageUrls={userImageUrls}
-              graphData={graphData}
               error={error}
             />
           </Flex>

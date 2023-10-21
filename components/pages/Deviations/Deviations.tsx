@@ -36,7 +36,6 @@ const Deviations: React.FC = () => {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<string[]>([]);
   const [selectedCreator, setSelectedCreator] = useState<string[]>([]);
-  const [graphData, setGraphData] = useState<any>(null); // TODO: Define proper type for graphData
   const [userImageUrls, setUserImageUrls] = useState<Record<string, string>>(
     {}
   );
@@ -53,33 +52,61 @@ const Deviations: React.FC = () => {
   });
   const deviations = deviationsQuery.data;
 
+  const usersQuery = useQuery({
+    queryKey: ["users"],
+    queryFn: async () => {
+      const response = await axios.get("/api/users");
+      return response.data;
+    },
+    staleTime: Infinity,
+    cacheTime: 5 * 60 * 1000,
+  });
+
+  const users = usersQuery.data;
+
   // Effects
 
   useEffect(() => {
-    if (!graphData) {
-      axios
-        .get("/api/get-tenant-users")
-        .then((response) => {
-          setGraphData(response.data);
-        })
-        .catch((error) => {
-          console.error("Error fetching graph data:", error);
-        });
-    }
-    const creatorNames = (deviations ?? []).flatMap((deviation) =>
-      (graphData ?? [])
-        .filter((employee: any) => deviation.creator === employee.id)
-        .map((employee: any) => ({
-          value: employee.id,
-          label: employee.displayName,
-        }))
-    );
+    const fetchData = async () => {
+      try {
+        const response = await axios.get("/api/get-tenant-users");
 
-    // Add the additional object to the array
-    creatorNames.push({ value: "Zendesk", label: "Zendesk" });
+        for (const user of response.data) {
+          // Check if the user exists in the array of users fetched from the database
+          const userInDb = users?.find((dbUser: any) => dbUser.id === user.id);
 
-    setCreatorsNames(creatorNames);
-  }, [graphData, deviations]);
+          if (!userInDb) {
+            // If the user doesn't exist in the database, insert it
+            await axios.post("/api/create-user", {
+              id: user.id,
+              name: user.displayName,
+            });
+          }
+        }
+
+        // Revalidate users
+        usersQuery.refetch();
+      } catch (error) {
+        console.error("Error fetching graph data:", error);
+      }
+
+      const creatorNames = (deviations ?? []).flatMap((deviation) =>
+        (users ?? [])
+          .filter((user: any) => deviation.creator === user.id)
+          .map((user: any) => ({
+            value: user.id,
+            label: user.name,
+          }))
+      );
+
+      // Add the additional object to the array
+      creatorNames.push({ value: "Zendesk", label: "Zendesk" });
+
+      setCreatorsNames(creatorNames);
+    };
+
+    fetchData();
+  }, [deviations, users]);
 
   useEffect(() => {
     if (!deviations) return;
@@ -138,7 +165,7 @@ const Deviations: React.FC = () => {
       }
     };
 
-    if (!graphData || !records) return;
+    if (!users || !records) return;
 
     const newUserImageUrls: Record<string, string> = {};
     const fetchImagesPromises: any = [];
@@ -167,7 +194,7 @@ const Deviations: React.FC = () => {
     Promise.all(fetchImagesPromises).then(() => {
       setUserImageUrls((prev) => ({ ...prev, ...newUserImageUrls }));
     });
-  }, [graphData, records]);
+  }, [users, records]);
 
   const categories = useMemo(
     () => Array.from(new Set(deviations?.map((e) => e.category))),
@@ -264,11 +291,7 @@ const Deviations: React.FC = () => {
             ellipsis: true,
 
             render: ({ creator }) => (
-              <UserBadge
-                identifier={creator}
-                userImageUrls={userImageUrls}
-                graphData={graphData}
-              />
+              <UserBadge identifier={creator} userImageUrls={userImageUrls} />
             ),
 
             filter: (
@@ -313,7 +336,6 @@ const Deviations: React.FC = () => {
               <UserBadge
                 identifier={assigneeId}
                 userImageUrls={userImageUrls}
-                graphData={graphData}
               />
             ),
           },
@@ -340,7 +362,6 @@ const Deviations: React.FC = () => {
                   children: (
                     <RedCardsProvider>
                       <DeviationDetails
-                        graphData={graphData}
                         record={record}
                         userImageUrls={userImageUrls}
                       />
@@ -359,7 +380,7 @@ const Deviations: React.FC = () => {
                   children: (
                     <RedCardsProvider>
                       <MutateDeviation
-                        graphData={graphData}
+                        users={users}
                         record={record}
                         mode="edit"
                       />

@@ -18,7 +18,7 @@ import { DeviationWithTickets } from "types/db";
 
 interface IMutateDeviation {
   record?: DeviationWithTickets;
-  graphData: any[];
+  users: any[];
   mode: "edit" | "create";
   closeModal?: () => void;
 }
@@ -45,7 +45,7 @@ const useStyles = createStyles((theme) => ({
 
 const MutateDeviation: React.FC<IMutateDeviation> = ({
   record,
-  graphData,
+  users,
   mode,
   closeModal,
 }) => {
@@ -78,18 +78,17 @@ const MutateDeviation: React.FC<IMutateDeviation> = ({
 
   const [assigneeName, setAssigneeName] = useState<string | null>(
     mode === "edit"
-      ? graphData.find((user: any) => user.id === record?.assigneeId)
-          ?.displayName || null
+      ? users.find((user: any) => user.id === record?.assigneeId)?.name || null
       : ""
   );
 
   useEffect(() => {
     setEmployees(
-      graphData.map((employee) => {
-        return { value: employee.displayName, label: employee.displayName };
+      users.map((user) => {
+        return { value: user.name, label: user.name };
       })
     );
-  }, [graphData]);
+  }, [users]);
 
   const queryClient = useQueryClient();
   const updateDeviationMutation = useMutation(
@@ -248,9 +247,8 @@ const MutateDeviation: React.FC<IMutateDeviation> = ({
                 tickets: record.tickets.filter(
                   (item) => !redCardIds.includes(item.id)
                 ),
-                assigneeId: graphData.find(
-                  (employee) => employee.displayName === assigneeName
-                )?.id,
+                assigneeId: users.find((user) => user.name === assigneeName)
+                  ?.id,
               });
               closeAllModals();
             }}
@@ -291,9 +289,8 @@ const MutateDeviation: React.FC<IMutateDeviation> = ({
                     ? 20
                     : 0,
                 creator: activeAccountId,
-                assigneeId: graphData.find(
-                  (employee) => employee.displayName === assigneeName
-                )?.id,
+                assigneeId: users.find((user) => user.name === assigneeName)
+                  ?.id,
               });
               closeModal();
             }}

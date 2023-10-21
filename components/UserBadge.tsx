@@ -1,19 +1,29 @@
 import { Alert, Avatar, Badge, Group, Text } from "@mantine/core";
 import { IconInfoCircle } from "@tabler/icons-react";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
 interface UserBadgeProps {
   identifier: string | null;
   error?: boolean | null;
   userImageUrls: Record<string, string>;
-  graphData: any[];
 }
 
 const UserBadge: React.FC<UserBadgeProps> = ({
   identifier,
   error = false,
   userImageUrls,
-  graphData,
 }) => {
+  const [userData, setUserData] = useState<any>(null);
+
+  useEffect(() => {
+    if (identifier && identifier !== "Zendesk") {
+      axios.get(`/api/users/${identifier}`).then((response) => {
+        setUserData(response.data);
+      });
+    }
+  }, [identifier]);
+
   if (identifier?.toLowerCase() === "zendesk") {
     return <Badge variant="outline">Zendesk</Badge>;
   }
@@ -33,11 +43,7 @@ const UserBadge: React.FC<UserBadgeProps> = ({
       ) : (
         ""
       )}
-
-      <Text fz="sm">
-        {graphData &&
-          graphData.find((user: any) => user.id === identifier)?.displayName}
-      </Text>
+      <Text fz="sm">{userData?.name}</Text>
     </Group>
   );
 };

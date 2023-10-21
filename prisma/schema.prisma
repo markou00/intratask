@@ -52,4 +52,12 @@ model Deviation {
   solvedBy    String? // External system reference
   progress    Int
   priority    String
+  User        User?    @relation(fields: [userId], references: [id])
+  userId      String?
+}
+
+model User {
+  id        String      @id // External system reference
+  name      String
+  Deviation Deviation[]
 }
