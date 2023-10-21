@@ -10,14 +10,11 @@ import {
 } from "@mantine/core";
 import { closeAllModals } from "@mantine/modals";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import TicketsAccordion from "components/TicketsAccordion";
+import { useRedCards } from "contexts/RedCardsContext";
 import React, { useEffect, useState } from "react";
-import { useRedCards } from "../../../contexts/RedCardsContext";
-import {
-  createDeviation,
-  updateDeviation,
-} from "../../../services/DeviationService";
-import { DeviationWithTickets } from "../../../types/db";
-import TicketsAccordion from "../../TicketsAccordion";
+import { createDeviation, updateDeviation } from "services/DeviationService";
+import { DeviationWithTickets } from "types/db";
 
 interface IMutateDeviation {
   record?: DeviationWithTickets;
@@ -58,22 +55,22 @@ const MutateDeviation: React.FC<IMutateDeviation> = ({
   const activeAccountId = instance.getActiveAccount()?.localAccountId;
 
   const [title, setTitle] = useState(
-    mode === "edit" ? record?.title.toLowerCase() || "" : ""
+    mode === "edit" ? record?.title || "" : ""
   );
   const [priority, setPriority] = useState<string | null>(
-    mode === "edit" ? record?.priority.toLowerCase() || null : ""
+    mode === "edit" ? record?.priority || null : ""
   );
   const [category, setCategory] = useState<string | null>(
-    mode === "edit" ? record?.category.toLowerCase() || null : ""
+    mode === "edit" ? record?.category || null : ""
   );
   const [status, setStatus] = useState<string | null>(
-    mode === "edit" ? record?.status.toLowerCase() || null : ""
+    mode === "edit" ? record?.status || null : ""
   );
   const [description, setDescription] = useState(
-    mode === "edit" ? record?.description.toLowerCase() : ""
+    mode === "edit" ? record?.description : ""
   );
   const [solution, setSolution] = useState(
-    mode === "edit" ? record?.solution && record.solution.toLowerCase() : ""
+    mode === "edit" ? record?.solution && record.solution : ""
   );
   const [employees, setEmployees] = useState<
     Array<{ value: string; label: string }>
@@ -133,9 +130,9 @@ const MutateDeviation: React.FC<IMutateDeviation> = ({
           classNames={{ input: classes.input, label: classes.inputLabel }}
           label="Prioritet:"
           data={[
-            { value: "lav", label: "Lav" },
-            { value: "normal", label: "Normal" },
-            { value: "høy", label: "Høy" },
+            { value: "Lav", label: "Lav" },
+            { value: "Normal", label: "Normal" },
+            { value: "Høy", label: "Høy" },
           ]}
           value={priority}
           onChange={setPriority}
@@ -145,12 +142,12 @@ const MutateDeviation: React.FC<IMutateDeviation> = ({
           classNames={{ input: classes.input, label: classes.inputLabel }}
           label="Kategori:"
           data={[
-            { value: "hms", label: "HMS" },
-            { value: "intern rutiner", label: "Interne rutiner" },
-            { value: "kvalitet", label: "Kvalitet" },
-            { value: "ytre miljø", label: "Ytre miljø" },
-            { value: "intern revisjon", label: "Intern revisjon" },
-            { value: "leverandører", label: "Leverandører" },
+            { value: "HMS", label: "HMS" },
+            { value: "Intern rutiner", label: "Interne rutiner" },
+            { value: "Kvalitet", label: "Kvalitet" },
+            { value: "Ytre miljø", label: "Ytre miljø" },
+            { value: "Intern revisjon", label: "Intern revisjon" },
+            { value: "Leverandører", label: "Leverandører" },
           ]}
           value={category}
           onChange={setCategory}
@@ -164,14 +161,14 @@ const MutateDeviation: React.FC<IMutateDeviation> = ({
           }}
           label="Status:"
           description={
-            status === "ferdig" && !solution
+            status === "Ferdig" && !solution
               ? "Beskriv løsningen nederst her!"
               : ""
           }
           data={[
-            { value: "ny", label: "Ny" },
-            { value: "pågår", label: "Pågår" },
-            { value: "ferdig", label: "Ferdig" },
+            { value: "Ny", label: "Ny" },
+            { value: "Pågår", label: "Pågår" },
+            { value: "Ferdig", label: "Ferdig" },
           ]}
           value={status}
           onChange={setStatus}
@@ -203,7 +200,7 @@ const MutateDeviation: React.FC<IMutateDeviation> = ({
           <Divider />
         </>
       )}
-      {(solution || status === "ferdig") && (
+      {(solution || status === "Ferdig") && (
         <>
           <Textarea
             classNames={{ input: classes.input, label: classes.inputLabel }}
@@ -235,11 +232,11 @@ const MutateDeviation: React.FC<IMutateDeviation> = ({
                 description,
                 solution,
                 progress:
-                  status?.toLowerCase() === "ferdig"
+                  status === "Ferdig"
                     ? 100
-                    : status?.toLowerCase() === "pågår"
+                    : status === "Pågår"
                     ? 50
-                    : status?.toLowerCase() === "ny"
+                    : status === "Ny"
                     ? 0
                     : record.progress,
                 tickets: record.tickets.filter(
@@ -278,11 +275,11 @@ const MutateDeviation: React.FC<IMutateDeviation> = ({
                 description,
                 solution,
                 progress:
-                  status?.toLowerCase() === "ferdig"
+                  status === "Ferdig"
                     ? 100
-                    : status?.toLowerCase() === "pågår"
+                    : status === "Pågår"
                     ? 50
-                    : status?.toLowerCase() === "ny"
+                    : status === "Ny"
                     ? 0
                     : 0,
                 creator: activeAccountId,
