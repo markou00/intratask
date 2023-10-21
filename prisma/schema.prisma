@@ -60,4 +60,5 @@ model User {
   id        String      @id // External system reference
   name      String
   Deviation Deviation[]
+  isActive  Boolean
 }

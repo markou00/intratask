@@ -23,6 +23,24 @@ export default async function handle(
     } catch (error) {
       return res.status(500).json({ error: "Failed to fetch user" });
     }
+  } else if (req.method === "PUT") {
+    const { ...data } = req.body;
+
+    if (!userId) {
+      return res.status(400).json({ error: "User ID is required" });
+    }
+
+    try {
+      const updatedUser = await prisma.user.update({
+        where: { id: userId as string },
+        data,
+      });
+
+      return res.status(200).json(updatedUser);
+    } catch (error) {
+      console.error("Error updating user:", error);
+      return res.status(500).json({ error: "Failed to update user" });
+    }
   } else {
     return res.status(405).end(); // Method Not Allowed
   }

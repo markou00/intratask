@@ -83,11 +83,15 @@ const MutateDeviation: React.FC<IMutateDeviation> = ({
   );
 
   useEffect(() => {
-    setEmployees(
-      users.map((user) => {
-        return { value: user.name, label: user.name };
-      })
-    );
+    if (users) {
+      setEmployees(
+        users
+          .filter((user: any) => user.isActive)
+          .map((user: any) => {
+            return { value: user.name, label: user.name };
+          })
+      );
+    }
   }, [users]);
 
   const queryClient = useQueryClient();

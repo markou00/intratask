@@ -20,12 +20,12 @@ import {
 } from "@mantine/core";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { IconLogout, IconPlus } from "@tabler/icons-react";
+import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
+import MutateDeviation from "components/modals/MutateDeviation/MutateDeviation";
+import { RedCardsProvider } from "contexts/RedCardsContext";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
-import { RedCardsProvider } from "../../contexts/RedCardsContext";
-import MutateDeviation from "../modals/MutateDeviation/MutateDeviation";
 
 const HEADER_HEIGHT = rem(40);
 
@@ -121,7 +121,6 @@ const links = [
 const Layout = () => {
   const [modalOpened, { open: openModal, close: closeModal }] =
     useDisclosure(false);
-  const [graphData, setGraphData] = useState<any>(null); // TODO: Define proper type for graphData
   const router = useRouter();
   const [opened, { toggle, close }] = useDisclosure(false);
   const { classes, cx } = useStyles();
@@ -133,18 +132,17 @@ const Layout = () => {
     instance.logoutRedirect();
   };
 
-  useEffect(() => {
-    if (!graphData) {
-      axios
-        .get("/api/get-tenant-users")
-        .then((response) => {
-          setGraphData(response.data);
-        })
-        .catch((error) => {
-          console.error("Error fetching graph data:", error);
-        });
-    }
-  }, [graphData]);
+  const usersQuery = useQuery({
+    queryKey: ["users"],
+    queryFn: async () => {
+      const response = await axios.get("/api/users");
+      return response.data;
+    },
+    staleTime: Infinity,
+    cacheTime: 5 * 60 * 1000,
+  });
+
+  const users = usersQuery.data;
 
   const items = links.map((link) => (
     <Link
@@ -210,7 +208,7 @@ const Layout = () => {
                 title="Opprett et nytt avvik"
               >
                 <MutateDeviation
-                  graphData={graphData}
+                  users={users}
                   mode="create"
                   closeModal={closeModal}
                 />

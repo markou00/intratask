@@ -70,6 +70,7 @@ const Deviations: React.FC = () => {
     const fetchData = async () => {
       try {
         const response = await axios.get("/api/get-tenant-users");
+        const graphUserIds = response.data.map((user: any) => user.id);
 
         for (const user of response.data) {
           // Check if the user exists in the array of users fetched from the database
@@ -80,6 +81,21 @@ const Deviations: React.FC = () => {
             await axios.post("/api/create-user", {
               id: user.id,
               name: user.displayName,
+              isActive: true, // Set isActive to true since the user is in graphData
+            });
+          } else {
+            // If the user exists, update their isActive status
+            await axios.put(`/api/users/${user.id}`, {
+              isActive: true,
+            });
+          }
+        }
+
+        // For users not in graphData, set their isActive status to false
+        for (const user of users) {
+          if (!graphUserIds.includes(user.id)) {
+            await axios.put(`/api/users/${user.id}`, {
+              isActive: false,
             });
           }
         }
