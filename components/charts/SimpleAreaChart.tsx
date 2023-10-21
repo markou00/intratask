@@ -1,5 +1,7 @@
 import { Alert, Flex } from "@mantine/core";
+import { Deviation } from "@prisma/client";
 import { IconAlertCircle } from "@tabler/icons-react";
+import { useFilters } from "contexts/FilterContext";
 import {
   Area,
   AreaChart,
@@ -10,9 +12,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { useFilters } from "../../contexts/FilterContext";
-import { aggregateDeviationsByMonth } from "../../utils/dataAggregation";
-import { Deviation } from "@prisma/client";
+import { aggregateDeviationsByMonth } from "utils/dataAggregation";
 
 interface ISimpleAreaChart {
   deviations: Deviation[];

@@ -48,14 +48,16 @@ export const aggregateDeviationsByMonth = (
   ];
 
   // Transform each deviation into a grouping key: "YYYY-MM"
-  const transformedDeviations = deviations.map((deviation) => {
-    const date = new Date(deviation.createdAt);
-    return {
-      year: date.getFullYear(),
-      month: date.getMonth(),
-      monthName: monthNames[date.getMonth()],
-    };
-  });
+  const transformedDeviations = deviations
+    .filter((deviation) => deviation.status !== "Forslag")
+    .map((deviation) => {
+      const date = new Date(deviation.createdAt);
+      return {
+        year: date.getFullYear(),
+        month: date.getMonth(),
+        monthName: monthNames[date.getMonth()],
+      };
+    });
 
   // Use a reducer to aggregate the count by month-year
   const aggregatedData = transformedDeviations.reduce((acc, curr) => {
@@ -100,15 +102,17 @@ export const aggregateDeviationsByMonthAndCategory = (
   ];
 
   // Transform each deviation into a grouping key: "YYYY-MM-category"
-  const transformedDeviations = deviations.map((deviation) => {
-    const date = new Date(deviation.createdAt);
-    return {
-      year: date.getFullYear(),
-      month: date.getMonth(),
-      monthName: monthNames[date.getMonth()],
-      category: deviation.category,
-    };
-  });
+  const transformedDeviations = deviations
+    .filter((deviation) => deviation.status !== "Forslag")
+    .map((deviation) => {
+      const date = new Date(deviation.createdAt);
+      return {
+        year: date.getFullYear(),
+        month: date.getMonth(),
+        monthName: monthNames[date.getMonth()],
+        category: deviation.category,
+      };
+    });
 
   // Use a reducer to aggregate the count by month-year-category
   const aggregatedData = transformedDeviations.reduce((acc, curr) => {

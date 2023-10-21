@@ -6,16 +6,16 @@ import {
   SimpleGrid,
   Title,
 } from "@mantine/core";
-import StatsCard from "../../StatsCard/StatsCard";
+import StatsCard from "components/StatsCard/StatsCard";
 
 import { useQuery } from "@tanstack/react-query";
-import ActiveFilters from "../..//ActiveFilters";
-import SimpleAreaChart from "../../charts/SimpleAreaChart";
-import SimplePieChart from "../../charts/SimplePieChart/SimplePieChart";
-import StackedBarChart from "../../charts/StackedBarChart";
-import { useFilters } from "../../../contexts/FilterContext";
-import { getDeviations } from "../../../services/DeviationService";
-import { ServerError } from "../ServerError";
+import ActiveFilters from "components/ActiveFilters";
+import SimpleAreaChart from "components/charts/SimpleAreaChart";
+import SimplePieChart from "components/charts/SimplePieChart/SimplePieChart";
+import StackedBarChart from "components/charts/StackedBarChart";
+import { ServerError } from "components/pages/ServerError";
+import { useFilters } from "contexts/FilterContext";
+import { getDeviations } from "services/DeviationService";
 
 const Dashboard: React.FC = () => {
   const deviationsQuery = useQuery({
@@ -40,16 +40,22 @@ const Dashboard: React.FC = () => {
 
   const deviationsToDisplay = filters.length ? filteredDeviations : deviations;
 
+  let suggestedCount = 0;
   let createdCount = 0;
   let solvedCount = 0;
   let unsolvedCount = 0;
   let zendeskCount = 0;
   // Calculate stats cards values
   deviationsToDisplay.forEach((deviation) => {
-    createdCount++;
+    if (deviation.status === "Forslag") suggestedCount++;
+    if (deviation.status !== "Forslag") createdCount++;
     if (deviation.isSolved) solvedCount++;
-    else unsolvedCount++;
-    if (deviation.creator.toLowerCase() === "zendesk") zendeskCount++;
+    if (!deviation.isSolved && deviation.status !== "Forslag") unsolvedCount++;
+    if (
+      deviation.creator.toLowerCase() === "zendesk" &&
+      deviation.status !== "Forslag"
+    )
+      zendeskCount++;
   });
 
   return (
@@ -57,7 +63,7 @@ const Dashboard: React.FC = () => {
       <ActiveFilters />
       <Container fluid p="md">
         <SimpleGrid
-          cols={4}
+          cols={5}
           spacing="xl"
           mb="lg"
           breakpoints={[
@@ -66,6 +72,11 @@ const Dashboard: React.FC = () => {
             { maxWidth: "36rem", cols: 1, spacing: "sm" },
           ]}
         >
+          <StatsCard
+            title="Foreslåtte avvik"
+            variant="suggested"
+            value={suggestedCount}
+          />
           <StatsCard
             title="Opprettet avvik"
             variant="created"
@@ -94,7 +105,7 @@ const Dashboard: React.FC = () => {
         >
           <Paper radius="md" shadow="sm" withBorder>
             <Title order={3} mt="sm" ta="center">
-              Årlig kategori andel
+              Kategori andel
             </Title>
             <Box h={400}>
               <SimplePieChart deviations={deviationsToDisplay} />
@@ -102,7 +113,7 @@ const Dashboard: React.FC = () => {
           </Paper>
           <Paper radius="md" shadow="sm" withBorder>
             <Title order={3} mt="sm" ta="center">
-              Månedelig avvik oversikt
+              Avvik oversikt
             </Title>
             <Box h={400}>
               <SimpleAreaChart deviations={deviationsToDisplay} />
@@ -112,7 +123,7 @@ const Dashboard: React.FC = () => {
         <SimpleGrid cols={1} bg="white">
           <Paper radius="md" shadow="sm" withBorder>
             <Title order={3} mt="sm" ta="center">
-              Månedelig kategori oversikt
+              Kategori oversikt
             </Title>
             <Box h={500}>
               <StackedBarChart deviations={deviationsToDisplay} />

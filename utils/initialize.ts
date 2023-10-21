@@ -314,7 +314,7 @@ export const insertDeviationAndUpdateTickets = async (similarTicketsMap) => {
             "Systemet har funnet flere potensielle gjentagende tickets",
           priority: "Normal",
           progress: 0,
-          status: "Ny",
+          status: "Forslag",
         },
       });
 

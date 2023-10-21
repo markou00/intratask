@@ -1,10 +1,10 @@
 import { Alert, Flex } from "@mantine/core";
-import { IconAlertCircle } from "@tabler/icons-react";
-import { Cell, Legend, Pie, PieChart, ResponsiveContainer } from "recharts";
-import { useFilters } from "../../../contexts/FilterContext";
-import { aggregateDataByCategory } from "../../../utils/dataAggregation";
-import CustomizedLabel from "./CustomizedLabel";
 import { Deviation } from "@prisma/client";
+import { IconAlertCircle } from "@tabler/icons-react";
+import { useFilters } from "contexts/FilterContext";
+import { Cell, Legend, Pie, PieChart, ResponsiveContainer } from "recharts";
+import { aggregateDataByCategory } from "utils/dataAggregation";
+import CustomizedLabel from "./CustomizedLabel";
 
 interface ISimplePieChart {
   deviations: Deviation[];
@@ -16,11 +16,14 @@ const SimplePieChart: React.FC<ISimplePieChart> = ({ deviations }) => {
   const { filters } = useFilters();
 
   const filteredDeviations = filters.length
-    ? deviations.filter(
-        (deviation) =>
-          new Date(deviation.createdAt).getFullYear().toString() === filters[0]
-      )
-    : deviations;
+    ? deviations
+        .filter(
+          (deviation) =>
+            new Date(deviation.createdAt).getFullYear().toString() ===
+            filters[0]
+        )
+        .filter((deviation) => deviation.status !== "Forslag")
+    : deviations.filter((deviation) => deviation.status !== "Forslag");
 
   const aggregatedData = aggregateDataByCategory(filteredDeviations);
 

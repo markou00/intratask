@@ -161,14 +161,16 @@ const MutateDeviation: React.FC<IMutateDeviation> = ({
           }}
           label="Status:"
           description={
-            status === "Ferdig" && !solution
+            status === "Løst" && !solution
               ? "Beskriv løsningen nederst her!"
               : ""
           }
           data={[
+            { value: "Forslag", label: "Forslag" },
             { value: "Ny", label: "Ny" },
+            { value: "Tildelt", label: "Tildelt" },
             { value: "Pågår", label: "Pågår" },
-            { value: "Ferdig", label: "Ferdig" },
+            { value: "Løst", label: "Løst" },
           ]}
           value={status}
           onChange={setStatus}
@@ -200,7 +202,7 @@ const MutateDeviation: React.FC<IMutateDeviation> = ({
           <Divider />
         </>
       )}
-      {(solution || status === "Ferdig") && (
+      {(solution || status === "Løst") && (
         <>
           <Textarea
             classNames={{ input: classes.input, label: classes.inputLabel }}
@@ -232,11 +234,15 @@ const MutateDeviation: React.FC<IMutateDeviation> = ({
                 description,
                 solution,
                 progress:
-                  status === "Ferdig"
+                  status === "Løst"
                     ? 100
                     : status === "Pågår"
-                    ? 50
+                    ? 60
+                    : status === "Tildelt"
+                    ? 40
                     : status === "Ny"
+                    ? 20
+                    : status === "Forslag"
                     ? 0
                     : record.progress,
                 tickets: record.tickets.filter(
@@ -275,12 +281,14 @@ const MutateDeviation: React.FC<IMutateDeviation> = ({
                 description,
                 solution,
                 progress:
-                  status === "Ferdig"
+                  status === "Løst"
                     ? 100
                     : status === "Pågår"
-                    ? 50
+                    ? 60
+                    : status === "Tildelt"
+                    ? 40
                     : status === "Ny"
-                    ? 0
+                    ? 20
                     : 0,
                 creator: activeAccountId,
                 assigneeId: graphData.find(

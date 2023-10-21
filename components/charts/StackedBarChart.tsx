@@ -1,6 +1,7 @@
 import { Alert, Flex } from "@mantine/core";
 import { Deviation } from "@prisma/client";
 import { IconAlertCircle } from "@tabler/icons-react";
+import { useFilters } from "contexts/FilterContext";
 import {
   Bar,
   BarChart,
@@ -10,11 +11,10 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { useFilters } from "../../contexts/FilterContext";
 import {
   aggregateDeviationsByMonthAndCategory,
   getUniqueCategories,
-} from "../../utils/dataAggregation";
+} from "utils/dataAggregation";
 
 interface IStackedBarChart {
   deviations: Deviation[];
