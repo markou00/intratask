@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "engines": {
-    "yarn": ">=1.22.00",
+    "yarn": ">=1.22.0",
     "node": ">=18.0.0"
   },
   "engineStrict": true,
