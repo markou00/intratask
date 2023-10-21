@@ -35,10 +35,14 @@ const Deviations: React.FC = () => {
   const [debouncedIdQuery] = useDebouncedValue(idQuery, 200);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<string[]>([]);
+  const [selectedCreator, setSelectedCreator] = useState<string[]>([]);
   const [graphData, setGraphData] = useState<any>(null); // TODO: Define proper type for graphData
   const [userImageUrls, setUserImageUrls] = useState<Record<string, string>>(
     {}
   );
+  const [creatorsNames, setCreatorsNames] = useState<
+    Array<{ value: string; label: string }>
+  >([]);
 
   // Queries
   const deviationsQuery = useQuery({
@@ -50,6 +54,7 @@ const Deviations: React.FC = () => {
   const deviations = deviationsQuery.data;
 
   // Effects
+
   useEffect(() => {
     if (!graphData) {
       axios
@@ -61,7 +66,20 @@ const Deviations: React.FC = () => {
           console.error("Error fetching graph data:", error);
         });
     }
-  }, [graphData]);
+    const creatorNames = (deviations ?? []).flatMap((deviation) =>
+      (graphData ?? [])
+        .filter((employee: any) => deviation.creator === employee.id)
+        .map((employee: any) => ({
+          value: employee.id,
+          label: employee.displayName,
+        }))
+    );
+
+    // Add the additional object to the array
+    creatorNames.push({ value: "Zendesk", label: "Zendesk" });
+
+    setCreatorsNames(creatorNames);
+  }, [graphData, deviations]);
 
   useEffect(() => {
     if (!deviations) return;
@@ -69,20 +87,24 @@ const Deviations: React.FC = () => {
     let processedData = deviations;
 
     // Filter data
-    processedData = processedData.filter(({ id, title, category, status }) => {
-      return (
-        (!debouncedTitleQuery ||
-          title
-            .toLowerCase()
-            .includes(debouncedTitleQuery.trim().toLowerCase())) &&
-        (!debouncedIdQuery ||
-          `${id}`
-            .toLowerCase()
-            .includes(debouncedIdQuery.trim().toLowerCase())) &&
-        (!selectedCategories.length || selectedCategories.includes(category)) &&
-        (!selectedStatus.length || selectedStatus.includes(status))
-      );
-    });
+    processedData = processedData.filter(
+      ({ id, title, category, status, creator }) => {
+        return (
+          (!debouncedTitleQuery ||
+            title
+              .toLowerCase()
+              .includes(debouncedTitleQuery.trim().toLowerCase())) &&
+          (!debouncedIdQuery ||
+            `${id}`
+              .toLowerCase()
+              .includes(debouncedIdQuery.trim().toLowerCase())) &&
+          (!selectedCategories.length ||
+            selectedCategories.includes(category)) &&
+          (!selectedStatus.length || selectedStatus.includes(status)) &&
+          (!selectedCreator.length || selectedCreator.includes(creator))
+        );
+      }
+    );
 
     // Sort data
     processedData = sortBy(processedData, sortStatus.columnAccessor);
@@ -97,6 +119,7 @@ const Deviations: React.FC = () => {
     debouncedTitleQuery,
     selectedCategories,
     selectedStatus,
+    selectedCreator,
     sortStatus,
   ]);
 
@@ -247,6 +270,21 @@ const Deviations: React.FC = () => {
                 graphData={graphData}
               />
             ),
+
+            filter: (
+              <MultiSelect
+                label="Creator"
+                description="Show different creators"
+                data={creatorsNames}
+                value={selectedCreator}
+                placeholder="Search creator..."
+                onChange={setSelectedCreator}
+                icon={<IconSearch size={16} />}
+                clearable
+                searchable
+              />
+            ),
+            filtering: selectedCreator.length > 0,
           },
           {
             accessor: "status",
