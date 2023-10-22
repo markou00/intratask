@@ -12,6 +12,8 @@ ENV NEXT_PUBLIC_AZURE_AD_DIRECTORY_ID ${NEXT_PUBLIC_AZURE_AD_DIRECTORY_ID}
 
 WORKDIR /usr/app
 
+COPY . .
+
 RUN yarn install --frozen-lockfile
 
 RUN yarn build
