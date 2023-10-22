@@ -9,11 +9,38 @@ import {
 } from "utils/initialize";
 import type { NextApiRequest, NextApiResponse } from "next";
 
+/**
+ * Initializes the application by populating the database with tickets and deviations.
+ * This function performs the following steps:
+ * 1. Checks if the database is empty.
+ * 2. Fetches tickets created after 2021.
+ * 3. Filters tickets based on specified tags.
+ * 4. Generates embeddings for ticket descriptions.
+ * 5. Inserts tickets into the database.
+ * 6. Finds deviations based on the filtered data.
+ * 7. Inserts generated deviations and updates relevant tickets.
+ *
+ * This route is intended to be used in a development environment **ONLY**.
+ * The process will take way too long so running this in prod will time-out.
+ *
+ * @function
+ * @async
+ * @param {NextApiRequest} req - The Next.js API request object.
+ * @param {NextApiResponse} res - The Next.js API response object.
+ * @returns {Promise<void>} A promise that resolves when the function completes.
+ * @throws Will throw an error if any step in the initialization process fails.
+ */
 export default async function initialize(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
   try {
+    if (process.env.NODE_ENV !== "development") {
+      return res
+        .status(403)
+        .json({ error: "This route is only for development purposes." });
+    }
+
     // 1. Check if the database is empty
     const existingTicketsCount = await prisma.ticket.count();
     if (existingTicketsCount > 0) {
