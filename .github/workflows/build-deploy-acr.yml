@@ -1,0 +1,33 @@
+name: Build & Push to Azure Container Registry
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@main
+
+      - name: Login to Azure Container Registry
+        uses: azure/docker-login@v1
+        with:
+          login-server: ${{ secrets.ACR_ENDPOINT }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+
+      - name: Build & Push
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          build-args: |
+            AZURE_AD_CLIENT_SECRET: ${{ secrets.AZURE_AD_CLIENT_SECRET }}
+            DATABASE_URL: ${{ secrets.DATABASE_URL }}
+            SHADOW_DATABASE_URL: ${{ secrets.SHADOW_DATABASE_URL }}
+            NEXT_PUBLIC_AZURE_AD_APPLICATION_ID: ${{ secrets.NEXT_PUBLIC_AZURE_AD_APPLICATION_ID }}
+            NEXT_PUBLIC_AZURE_AD_DIRECTORY_ID: ${{ secrets.NEXT_PUBLIC_AZURE_AD_DIRECTORY_ID }}
+          tags: ${{secrets.ACR_ENDPOINT}}/intratask:latest
+          file: ./Dockerfile
