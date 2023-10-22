@@ -12,8 +12,8 @@ ENV NEXT_PUBLIC_AZURE_AD_DIRECTORY_ID ${NEXT_PUBLIC_AZURE_AD_DIRECTORY_ID}
 
 WORKDIR /usr/app
 
-RUN npm ci
+RUN yarn install --frozen-lockfile
 
-RUN npm run build
+RUN yarn build
 
-CMD [ "npm", "start" ]
+CMD [ "yarn", "start" ]
