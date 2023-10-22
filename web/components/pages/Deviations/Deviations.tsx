@@ -106,17 +106,30 @@ const Deviations: React.FC = () => {
         console.error("Error fetching graph data:", error);
       }
 
+      const uniqueIds = new Set();
       const creatorNames = (deviations ?? []).flatMap((deviation) =>
         (users ?? [])
-          .filter((user: any) => deviation.creator === user.id)
+          .filter((user: any) => {
+            if (deviation.creator === user.id && !uniqueIds.has(user.id)) {
+              uniqueIds.add(user.id);
+              return true;
+            }
+            return false;
+          })
           .map((user: any) => ({
             value: user.id,
             label: user.name,
           }))
       );
 
-      // Add the additional object to the array
-      creatorNames.push({ value: "Zendesk", label: "Zendesk" });
+      // Check if the "Zendesk" entry is already present
+      const zendeskExists = creatorNames.some(
+        (entry) => entry.value === "Zendesk"
+      );
+
+      if (!zendeskExists) {
+        creatorNames.push({ value: "Zendesk", label: "Zendesk" });
+      }
 
       setCreatorsNames(creatorNames);
     };
