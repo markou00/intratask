@@ -24,10 +24,10 @@ jobs:
         with:
           push: true
           build-args: |
-            AZURE_AD_CLIENT_SECRET: ${{ secrets.AZURE_AD_CLIENT_SECRET }}
-            DATABASE_URL: ${{ secrets.DATABASE_URL }}
-            SHADOW_DATABASE_URL: ${{ secrets.SHADOW_DATABASE_URL }}
-            NEXT_PUBLIC_AZURE_AD_APPLICATION_ID: ${{ secrets.NEXT_PUBLIC_AZURE_AD_APPLICATION_ID }}
-            NEXT_PUBLIC_AZURE_AD_DIRECTORY_ID: ${{ secrets.NEXT_PUBLIC_AZURE_AD_DIRECTORY_ID }}
+            AZURE_AD_CLIENT_SECRET=${{ secrets.AZURE_AD_CLIENT_SECRET }}
+            DATABASE_URL=${{ secrets.DATABASE_URL }}
+            SHADOW_DATABASE_URL=${{ secrets.SHADOW_DATABASE_URL }}
+            NEXT_PUBLIC_AZURE_AD_APPLICATION_ID=${{ secrets.NEXT_PUBLIC_AZURE_AD_APPLICATION_ID }}
+            NEXT_PUBLIC_AZURE_AD_DIRECTORY_ID=${{ secrets.NEXT_PUBLIC_AZURE_AD_DIRECTORY_ID }}
           tags: ${{secrets.ACR_ENDPOINT}}/intratask:latest
           file: ./Dockerfile
