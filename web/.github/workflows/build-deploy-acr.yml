@@ -30,4 +30,4 @@ jobs:
             NEXT_PUBLIC_AZURE_AD_APPLICATION_ID=${{ secrets.NEXT_PUBLIC_AZURE_AD_APPLICATION_ID }}
             NEXT_PUBLIC_AZURE_AD_DIRECTORY_ID=${{ secrets.NEXT_PUBLIC_AZURE_AD_DIRECTORY_ID }}
           tags: ${{secrets.ACR_ENDPOINT}}/intratask:latest
-          file: ./Dockerfile
+          file: ./web/Dockerfile

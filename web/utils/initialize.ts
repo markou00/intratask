@@ -125,6 +125,18 @@ export const insertInitialData = async (tickets) => {
   let recordCounter = 0;
 
   for (const ticket of tickets) {
+    // Check if the ticket already exists in the database
+    const existingTicket = await prisma.ticket.findUnique({
+      where: {
+        id: ticket.id,
+      },
+    });
+
+    // If the ticket already exists, skip the current iteration
+    if (existingTicket) {
+      continue;
+    }
+
     // First, create the Ticket record. This MUST be created first
     const createdTicket = await prisma.ticket.create({
       data: {
@@ -353,14 +365,19 @@ export const insertDeviationAndUpdateTickets = async (similarTicketsMap) => {
  * @async
  * @returns {Array<Object>} - An array containing all the tickets retrieved from the database. Each ticket object includes its associated `descriptionVector`.
  */
-export const getAllTicketsInChunks = async () => {
+export const getAllTicketsInChunks = async (isInDeviation: boolean) => {
   let skip = 0;
   const take = 2000;
   let tickets = [];
   let moreData = true;
 
+  const whereClause = isInDeviation
+    ? { deviationId: { not: null } } // Tickets associated with a deviation
+    : { deviationId: null }; // Tickets not associated with any deviation
+
   while (moreData) {
     const chunk = await prisma.ticket.findMany({
+      where: whereClause,
       include: {
         descriptionVector: true,
       },
